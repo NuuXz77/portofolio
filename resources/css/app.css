@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap');
+
 @import 'tailwindcss';
 @plugin "daisyui";
 
@@ -7,6 +9,240 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Sora', ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+html:not(.aos-active) [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+body.portfolio-root {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 8% 15%, rgba(56, 189, 248, 0.16), transparent 35%),
+        radial-gradient(circle at 92% 14%, rgba(124, 58, 237, 0.12), transparent 42%),
+        radial-gradient(circle at 50% 100%, rgba(37, 99, 235, 0.16), transparent 40%),
+        #05070d;
+    font-family: var(--font-sans);
+}
+
+#portfolio h1,
+#portfolio h2,
+#portfolio h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+}
+
+.portfolio-grid {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.2;
+    background-image:
+        linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 75%);
+}
+
+.portfolio-glow {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 12% 12%, rgba(14, 165, 233, 0.22), transparent 45%),
+        radial-gradient(circle at 86% 30%, rgba(139, 92, 246, 0.2), transparent 38%),
+        radial-gradient(circle at 55% 100%, rgba(59, 130, 246, 0.2), transparent 42%);
+}
+
+.portfolio-glass {
+    background: linear-gradient(130deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.sidebar-collapsed .sidebar-label {
+    display: none;
+}
+
+#admin-sidebar {
+    width: 18rem;
+}
+
+#admin-main {
+    padding-left: 18rem;
+}
+
+#admin-shell.sidebar-collapsed #admin-sidebar {
+    width: 5rem;
+}
+
+#admin-shell.sidebar-collapsed #admin-main {
+    padding-left: 5rem;
+}
+
+.sidebar-collapsed .sidebar-brand {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.sidebar-collapsed .sidebar-link {
+    justify-content: center;
+    gap: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.sidebar-collapsed .sidebar-logout-btn {
+    justify-content: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+@media (max-width: 1023px) {
+    #admin-main {
+        padding-left: 0 !important;
+    }
+
+    #admin-sidebar {
+        width: min(20rem, calc(100vw - 2.5rem));
+    }
+
+    #admin-shell.sidebar-collapsed #admin-sidebar {
+        width: min(20rem, calc(100vw - 2.5rem));
+    }
+}
+
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.32);
+    border-radius: 999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#mobile-menu-panel {
+    transition:
+        max-height 0.3s ease,
+        opacity 0.3s ease,
+        border-color 0.3s ease,
+        transform 0.3s ease;
+    transform-origin: top;
+    transform: translateY(-6px);
+}
+
+#mobile-menu-panel.is-open {
+    max-height: 28rem;
+    opacity: 1;
+    transform: translateY(0);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.project-card {
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease,
+        filter 0.3s ease;
+}
+
+.project-card.project-hidden {
+    display: none;
+}
+
+.project-filter.is-active {
+    background: linear-gradient(120deg, rgba(14, 165, 233, 0.18), rgba(59, 130, 246, 0.28));
+    border-color: rgba(125, 211, 252, 0.55);
+    color: #fff;
+}
+
+#back-to-top.is-visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.featured-swiper .swiper-pagination-bullet,
+.testimonial-swiper .swiper-pagination-bullet {
+    background: rgba(255, 255, 255, 0.34);
+    opacity: 1;
+}
+
+.featured-desc {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.featured-pagination.swiper-pagination-horizontal {
+    display: inline-flex;
+    width: auto !important;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.featured-swiper .swiper-pagination-bullet {
+    height: 7px;
+    width: 7px;
+}
+
+.featured-swiper .swiper-pagination-bullet-active {
+    width: 18px;
+    border-radius: 999px;
+}
+
+.featured-swiper .swiper-pagination-bullet-active,
+.testimonial-swiper .swiper-pagination-bullet-active {
+    background: rgb(56, 189, 248);
+}
+
+#typing-role::after {
+    content: '|';
+    margin-left: 0.16rem;
+    color: rgba(125, 211, 252, 0.95);
+    animation: cursor-blink 0.9s infinite;
+}
+
+@keyframes cursor-blink {
+    0%,
+    45% {
+        opacity: 1;
+    }
+
+    46%,
+    100% {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
