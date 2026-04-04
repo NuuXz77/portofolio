@@ -8,7 +8,7 @@
         <i data-lucide="{{ $icon }}" class="h-4 w-4"></i>
     </button>
 
-    <ul tabindex="0" class="menu dropdown-content z-50 mt-1 w-40 rounded-box border border-base-content/10 bg-base-100 p-2 shadow-xl">
+    <ul tabindex="0" class="glass-surface-soft menu dropdown-content z-50 mt-1 w-40 rounded-box border border-base-content/10 bg-base-100 p-2 shadow-xl">
         {{ $slot }}
     </ul>
 </div>

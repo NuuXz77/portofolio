@@ -21,7 +21,7 @@
         type="file"
         @if($name) name="{{ $name }}" @endif
         {{ $attributes->merge([
-            'class' => trim('file-input file-input-bordered rounded-xl '.$inputClass),
+            'class' => trim('file-input file-input-bordered glass-field rounded-xl '.$inputClass),
         ]) }}
     >
 

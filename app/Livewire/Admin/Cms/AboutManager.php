@@ -77,8 +77,8 @@ class AboutManager extends Component
         $this->existingImage = $image;
 
         AdminActivity::log('updated', 'about', 'Updated about section content.');
-
-        session()->flash('success', 'About section updated.');
+    session()->flash('success', 'About section updated.');
+    $this->dispatch('app-toast', type: 'success', message: 'About section updated.');
     }
 
     public function render()

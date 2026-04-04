@@ -98,8 +98,8 @@ class ServicesManager extends Component
 
         $this->showModal = false;
         $this->resetForm();
-
-        session()->flash('success', 'Service saved successfully.');
+    session()->flash('success', 'Service saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Service saved successfully.');
     }
 
     public function delete(int $serviceId): void
@@ -111,8 +111,8 @@ class ServicesManager extends Component
         AdminActivity::log('deleted', 'services', 'Deleted service record.', [
             'title' => $title,
         ]);
-
-        session()->flash('success', 'Service deleted successfully.');
+    session()->flash('success', 'Service deleted successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Service deleted successfully.');
     }
 
     public function resetForm(): void

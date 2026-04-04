@@ -52,8 +52,8 @@ class NavbarManager extends Component
         ]);
 
         AdminActivity::log('updated', 'navbar', 'Updated navbar global settings.');
-
-        session()->flash('success', 'Navbar settings saved successfully.');
+    session()->flash('success', 'Navbar settings saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Navbar settings saved successfully.');
     }
 
     public function editMenuItem(int $menuItemId): void
@@ -91,7 +91,8 @@ class NavbarManager extends Component
         ]);
 
         $this->resetMenuForm();
-        session()->flash('success', 'Menu item saved.');
+    session()->flash('success', 'Menu item saved.');
+    $this->dispatch('app-toast', type: 'success', message: 'Menu item saved.');
     }
 
     public function deleteMenuItem(int $menuItemId): void
@@ -103,8 +104,8 @@ class NavbarManager extends Component
         AdminActivity::log('deleted', 'navbar', 'Deleted navbar menu item.', [
             'label' => $label,
         ]);
-
-        session()->flash('success', 'Menu item deleted.');
+    session()->flash('success', 'Menu item deleted.');
+    $this->dispatch('app-toast', type: 'success', message: 'Menu item deleted.');
     }
 
     public function resetMenuForm(): void

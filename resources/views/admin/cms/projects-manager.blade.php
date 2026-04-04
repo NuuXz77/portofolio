@@ -1,4 +1,16 @@
 <section class="space-y-4">
+    @php
+        $columns = [
+            ['label' => 'Title', 'field' => 'title', 'sortable' => true],
+            ['label' => 'Category'],
+            ['label' => 'Tech Stack'],
+            ['label' => 'Featured'],
+            ['label' => 'Visible'],
+            ['label' => 'Order'],
+            ['label' => 'Actions', 'class' => 'text-right w-20'],
+        ];
+    @endphp
+
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">
             <x-ui.input-field name="search" wire:model.live.debounce.300ms="search" placeholder="Search project" />
@@ -12,21 +24,15 @@
         <button wire:click="openCreateModal" class="btn btn-info rounded-xl text-white">Add Project</button>
     </div>
 
-    <x-ui.table>
-        <x-slot:head>
-                <tr>
-                    <th><button wire:click="sortBy('title')" class="btn btn-ghost btn-xs">Title</button></th>
-                    <th>Category</th>
-                    <th>Tech Stack</th>
-                    <th>Featured</th>
-                    <th>Visible</th>
-                    <th>Order</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-        </x-slot:head>
-
-        @forelse ($projects as $project)
-            <tr>
+    <x-ui.table
+        :columns="$columns"
+        :data="$projects"
+        :sortField="$sortField"
+        :sortDirection="$sortDirection"
+        emptyMessage="No project found."
+    >
+        @foreach ($projects as $project)
+            <tr wire:key="project-{{ $project->id }}">
                 <td>{{ $project->title }}</td>
                 <td>{{ $project->category }}</td>
                 <td>
@@ -36,8 +42,8 @@
                         @endforeach
                     </div>
                 </td>
-                <td><span class="badge {{ $project->is_featured ? 'badge-info' : 'badge-ghost' }}">{{ $project->is_featured ? 'Yes' : 'No' }}</span></td>
-                <td><span class="badge {{ $project->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $project->is_visible ? 'Yes' : 'No' }}</span></td>
+                <td><span class="badge badge-soft {{ $project->is_featured ? 'badge-info' : 'badge-ghost' }}">{{ $project->is_featured ? 'Yes' : 'No' }}</span></td>
+                <td><span class="badge badge-soft {{ $project->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $project->is_visible ? 'Yes' : 'No' }}</span></td>
                 <td>{{ $project->sort_order }}</td>
                 <td class="text-right">
                     <x-ui.dropdown-action>
@@ -46,11 +52,7 @@
                     </x-ui.dropdown-action>
                 </td>
             </tr>
-        @empty
-            <tr>
-                <td colspan="7" class="text-center text-base-content/55">No project found.</td>
-            </tr>
-        @endforelse
+        @endforeach
     </x-ui.table>
 
     <div>{{ $projects->links() }}</div>

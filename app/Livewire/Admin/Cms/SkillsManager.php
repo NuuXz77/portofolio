@@ -110,8 +110,8 @@ class SkillsManager extends Component
 
         $this->showModal = false;
         $this->resetForm();
-
-        session()->flash('success', 'Skill saved successfully.');
+    session()->flash('success', 'Skill saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Skill saved successfully.');
     }
 
     public function delete(int $skillId): void
@@ -123,8 +123,8 @@ class SkillsManager extends Component
         AdminActivity::log('deleted', 'skills', 'Deleted skill record.', [
             'name' => $name,
         ]);
-
-        session()->flash('success', 'Skill deleted successfully.');
+    session()->flash('success', 'Skill deleted successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Skill deleted successfully.');
     }
 
     public function resetForm(): void

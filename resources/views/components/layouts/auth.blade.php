@@ -10,10 +10,17 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-base-100">
-        <div class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
-            <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.22),transparent_45%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.2),transparent_40%)]"></div>
-            <div class="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(148,163,184,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.1)_1px,transparent_1px)] [background-size:40px_40px]"></div>
+    <body class="premium-bg-root premium-bg-auth min-h-screen bg-base-100 text-base-content">
+        <div aria-hidden="true" class="premium-background pointer-events-none">
+            <div class="premium-grid"></div>
+            <div class="premium-glow premium-glow-top-left"></div>
+            <div class="premium-glow premium-glow-bottom-right"></div>
+            <div class="premium-glow premium-glow-center"></div>
+            <div class="premium-noise"></div>
+            <div class="premium-vignette"></div>
+        </div>
+
+        <div class="relative z-10 flex min-h-screen items-center justify-center overflow-hidden px-4 py-12">
             {{ $slot }}
         </div>
 

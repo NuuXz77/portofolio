@@ -1,24 +1,30 @@
 <section class="space-y-4">
+    @php
+        $columns = [
+            ['label' => 'Name', 'field' => 'name', 'sortable' => true],
+            ['label' => 'Role'],
+            ['label' => 'Message'],
+            ['label' => 'Avatar'],
+            ['label' => 'Visible'],
+            ['label' => 'Order'],
+            ['label' => 'Actions', 'class' => 'text-right w-20'],
+        ];
+    @endphp
+
     <div class="flex flex-wrap items-center justify-between gap-3">
         <x-ui.input-field name="search" wire:model.live.debounce.300ms="search" placeholder="Search testimonial" />
         <button wire:click="openCreateModal" class="btn btn-info rounded-xl text-white">Add Testimonial</button>
     </div>
 
-    <x-ui.table>
-        <x-slot:head>
-                <tr>
-                    <th><button wire:click="sortBy('name')" class="btn btn-ghost btn-xs">Name</button></th>
-                    <th>Role</th>
-                    <th>Message</th>
-                    <th>Avatar</th>
-                    <th>Visible</th>
-                    <th>Order</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-        </x-slot:head>
-
-        @forelse ($testimonials as $testimonial)
-            <tr>
+    <x-ui.table
+        :columns="$columns"
+        :data="$testimonials"
+        :sortField="$sortField"
+        :sortDirection="$sortDirection"
+        emptyMessage="No testimonial found."
+    >
+        @foreach ($testimonials as $testimonial)
+            <tr wire:key="testimonial-{{ $testimonial->id }}">
                 <td>{{ $testimonial->name }}</td>
                 <td>{{ $testimonial->role }}</td>
                 <td class="max-w-md truncate">{{ $testimonial->message }}</td>
@@ -29,7 +35,7 @@
                         -
                     @endif
                 </td>
-                <td><span class="badge {{ $testimonial->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $testimonial->is_visible ? 'Yes' : 'No' }}</span></td>
+                <td><span class="badge badge-soft {{ $testimonial->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $testimonial->is_visible ? 'Yes' : 'No' }}</span></td>
                 <td>{{ $testimonial->sort_order }}</td>
                 <td class="text-right">
                     <x-ui.dropdown-action>
@@ -38,9 +44,7 @@
                     </x-ui.dropdown-action>
                 </td>
             </tr>
-        @empty
-            <tr><td colspan="7" class="text-center text-base-content/55">No testimonial found.</td></tr>
-        @endforelse
+        @endforeach
     </x-ui.table>
 
     <div>{{ $testimonials->links() }}</div>

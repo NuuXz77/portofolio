@@ -45,7 +45,7 @@
         <legend class="fieldset-legend {{ $labelClass }}">{{ $label }}</legend>
     @endif
 
-    <label class="input input-bordered validator flex w-full items-center gap-2 rounded-xl {{ $sizeClass }} {{ $inputStateClass }}">
+    <label class="input input-bordered glass-field validator flex w-full items-center gap-2 rounded-xl {{ $sizeClass }} {{ $inputStateClass }}">
         @if ($icon)
             @if ($isDynamicComponentIcon)
                 <x-dynamic-component :component="$icon" class="h-4 w-4 opacity-70" />

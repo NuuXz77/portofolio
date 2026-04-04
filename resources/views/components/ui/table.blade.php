@@ -6,7 +6,7 @@
     'emptyMessage' => 'Tidak ada data',
     'emptySubMessage' => 'Silakan tambah data baru',
     'emptyIcon' => 'heroicon-o-inbox',
-    'striped' => true,
+    'striped' => false,
     'wrapperClass' => '',
     'tableClass' => '',
 ])
@@ -33,7 +33,7 @@
     $resolvedEmptyIcon = $isHeroiconAlias ? 'inbox' : $emptyIcon;
 @endphp
 
-<div class="rounded-2xl border border-base-content/10 bg-base-100 shadow-sm {{ $wrapperClass }}" style="overflow-x: auto; overflow-y: visible !important;">
+<div class="glass-card rounded-2xl border border-base-content/10 bg-base-100 shadow-sm {{ $wrapperClass }}" style="overflow-x: auto; overflow-y: visible !important;">
     <table class="table {{ $striped ? 'table-zebra' : '' }} {{ $tableClass }}" style="position: relative;">
         @if ($hasColumns)
             <thead>

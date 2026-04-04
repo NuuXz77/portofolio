@@ -103,8 +103,8 @@ class ExperiencesManager extends Component
 
         $this->showModal = false;
         $this->resetForm();
-
-        session()->flash('success', 'Experience saved successfully.');
+    session()->flash('success', 'Experience saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Experience saved successfully.');
     }
 
     public function delete(int $experienceId): void
@@ -116,8 +116,8 @@ class ExperiencesManager extends Component
         AdminActivity::log('deleted', 'experiences', 'Deleted experience record.', [
             'role' => $role,
         ]);
-
-        session()->flash('success', 'Experience deleted successfully.');
+    session()->flash('success', 'Experience deleted successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Experience deleted successfully.');
     }
 
     public function resetForm(): void

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Article;
+use App\Models\ArticleCategory;
 use App\Models\MenuItem;
 use App\Models\Project;
 use App\Models\Service;
@@ -107,11 +109,25 @@ class DatabaseSeeder extends Seeder
             ['label' => 'Skills', 'href' => '#skills', 'sort_order' => 3],
             ['label' => 'Projects', 'href' => '#projects', 'sort_order' => 4],
             ['label' => 'Experience', 'href' => '#experience', 'sort_order' => 5],
-            ['label' => 'Contact', 'href' => '#contact', 'sort_order' => 6],
+            ['label' => 'Journal', 'href' => '/journal', 'sort_order' => 6],
+            ['label' => 'Contact', 'href' => '#contact', 'sort_order' => 7],
         ] as $menu) {
             MenuItem::query()->updateOrCreate(
                 ['label' => $menu['label']],
                 $menu + ['is_visible' => true]
+            );
+        }
+
+        $journalCategories = [
+            ['name' => 'Engineering', 'slug' => 'engineering', 'description' => 'Technical notes and architecture insights.'],
+            ['name' => 'DevOps', 'slug' => 'devops', 'description' => 'Deployment and infrastructure journey.'],
+            ['name' => 'Daily Log', 'slug' => 'daily-log', 'description' => 'Daily progress and working notes.'],
+        ];
+
+        foreach ($journalCategories as $categoryData) {
+            ArticleCategory::query()->updateOrCreate(
+                ['slug' => $categoryData['slug']],
+                $categoryData
             );
         }
 
@@ -139,6 +155,62 @@ class DatabaseSeeder extends Seeder
                     'slug' => Str::slug($project['title']),
                     'image_path' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
                     'is_visible' => true,
+                ]
+            );
+        }
+
+        $engineeringCategory = ArticleCategory::query()->where('slug', 'engineering')->first();
+        $devopsCategory = ArticleCategory::query()->where('slug', 'devops')->first();
+        $dailyCategory = ArticleCategory::query()->where('slug', 'daily-log')->first();
+
+        foreach ([
+            [
+                'title' => 'Designing a Scalable Laravel Module Structure',
+                'slug' => 'designing-a-scalable-laravel-module-structure',
+                'excerpt' => 'How I keep a large CMS codebase maintainable with modular Livewire and reusable components.',
+                'content' => '<h2>Context</h2><p>As the codebase grows, one of the biggest risks is placing too many responsibilities in a single component.</p><h2>Approach</h2><p>I split each CMS domain into focused Livewire components and shared UI components for consistency.</p><pre><code class="language-php">return view(\'admin.cms.journal.articles-manager\');</code></pre>',
+                'tags' => ['laravel', 'livewire', 'architecture'],
+                'status' => 'published',
+                'visibility' => 'public',
+                'published_at' => now()->subDays(6),
+                'author_name' => 'Wisnu Admin',
+                'read_time' => 4,
+                'category_id' => $engineeringCategory?->id,
+            ],
+            [
+                'title' => 'Practical CI/CD Checklist for Portfolio Projects',
+                'slug' => 'practical-ci-cd-checklist-for-portfolio-projects',
+                'excerpt' => 'A practical deployment checklist to reduce regressions and speed up release confidence.',
+                'content' => '<h2>Deployment Flow</h2><p>Small projects still need guardrails: lint, tests, migration checks, and health probes.</p><ul><li>Run tests</li><li>Build assets</li><li>Smoke test key routes</li></ul>',
+                'tags' => ['devops', 'ci-cd', 'deployment'],
+                'status' => 'published',
+                'visibility' => 'public',
+                'published_at' => now()->subDays(3),
+                'author_name' => 'Wisnu Admin',
+                'read_time' => 3,
+                'category_id' => $devopsCategory?->id,
+            ],
+            [
+                'title' => 'Internal Notes: Private Delivery Plan',
+                'slug' => 'internal-notes-private-delivery-plan',
+                'excerpt' => 'Private planning notes for upcoming implementation milestones.',
+                'content' => '<h2>Private Notes</h2><p>This content is intended for private preview only.</p><p>Use the generated tokenized URL for controlled access.</p>',
+                'tags' => ['private', 'planning'],
+                'status' => 'published',
+                'visibility' => 'private',
+                'published_at' => now()->subDay(),
+                'author_name' => 'Wisnu Admin',
+                'read_time' => 2,
+                'access_token' => Str::random(40),
+                'category_id' => $dailyCategory?->id,
+            ],
+        ] as $article) {
+            Article::query()->updateOrCreate(
+                ['slug' => $article['slug']],
+                $article + [
+                    'thumbnail_path' => 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1200&q=80',
+                    'content' => $article['content'],
+                    'view_count' => 0,
                 ]
             );
         }

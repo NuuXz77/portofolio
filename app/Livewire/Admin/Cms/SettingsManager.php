@@ -42,8 +42,8 @@ class SettingsManager extends Component
         ]);
 
         AdminActivity::log('updated', 'settings', 'Updated SEO settings.');
-
-        session()->flash('success', 'Settings saved successfully.');
+    session()->flash('success', 'Settings saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Settings saved successfully.');
     }
 
     public function render()

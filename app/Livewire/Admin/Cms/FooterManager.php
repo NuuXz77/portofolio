@@ -62,8 +62,8 @@ class FooterManager extends Component
         ]);
 
         AdminActivity::log('updated', 'footer', 'Updated footer settings.');
-
-        session()->flash('success', 'Footer updated successfully.');
+    session()->flash('success', 'Footer updated successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Footer updated successfully.');
     }
 
     public function render()

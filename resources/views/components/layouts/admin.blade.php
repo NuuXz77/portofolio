@@ -10,11 +10,20 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         @livewireStyles
     </head>
-    <body class="min-h-screen bg-base-200 text-base-content">
-        <div id="admin-shell" class="min-h-screen">
+    <body class="premium-bg-root premium-bg-admin min-h-screen bg-base-200 text-base-content">
+        <div aria-hidden="true" class="premium-background pointer-events-none">
+            <div class="premium-grid"></div>
+            <div class="premium-glow premium-glow-top-left"></div>
+            <div class="premium-glow premium-glow-bottom-right"></div>
+            <div class="premium-glow premium-glow-center"></div>
+            <div class="premium-noise"></div>
+            <div class="premium-vignette"></div>
+        </div>
+
+        <div id="admin-shell" class="relative z-10 min-h-screen">
             <div id="admin-sidebar-backdrop" class="fixed inset-0 z-30 bg-black/55 opacity-0 pointer-events-none transition-opacity duration-300 lg:hidden"></div>
 
-            <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-base-content/10 bg-base-100 px-4 py-5 shadow-xl transition-all duration-300 lg:translate-x-0">
+            <aside id="admin-sidebar" class="glass-surface fixed inset-y-0 left-0 z-40 w-72 -translate-x-full border-r border-base-content/10 bg-base-100 px-4 py-5 shadow-xl transition-all duration-300 lg:translate-x-0">
                 @include('components.partials.sidebar')
             </aside>
 

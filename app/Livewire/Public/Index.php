@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Public;
 
+use App\Models\Article;
 use App\Models\Experience;
 use App\Models\MenuItem;
 use App\Models\Project;
@@ -47,6 +48,14 @@ class Index extends Component
             ->orderBy('id')
             ->get();
 
+        $latestArticles = Article::query()
+            ->with('category:id,name,slug')
+            ->publiclyVisible()
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->take(3)
+            ->get();
+
         if ($featuredProjects->isEmpty()) {
             $featuredProjects = $projects->take(3)->values();
         }
@@ -62,6 +71,7 @@ class Index extends Component
             'skillsByCategory' => $skills->groupBy('category'),
             'projects' => $projects,
             'featuredProjects' => $featuredProjects,
+            'latestArticles' => $latestArticles,
             'experiences' => Experience::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
             'services' => Service::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
             'testimonials' => Testimonial::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),

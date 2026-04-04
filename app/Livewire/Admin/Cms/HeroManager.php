@@ -86,8 +86,8 @@ class HeroManager extends Component
         $this->existingImage = $image;
 
         AdminActivity::log('updated', 'hero', 'Updated hero section settings.');
-
-        session()->flash('success', 'Hero section updated.');
+    session()->flash('success', 'Hero section updated.');
+    $this->dispatch('app-toast', type: 'success', message: 'Hero section updated.');
     }
 
     public function render()

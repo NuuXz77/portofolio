@@ -148,8 +148,8 @@ class ProjectsManager extends Component
 
         $this->showModal = false;
         $this->resetForm();
-
-        session()->flash('success', 'Project saved successfully.');
+    session()->flash('success', 'Project saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Project saved successfully.');
     }
 
     public function deleteProject(int $projectId): void
@@ -161,8 +161,8 @@ class ProjectsManager extends Component
         AdminActivity::log('deleted', 'projects', 'Deleted project record.', [
             'title' => $title,
         ]);
-
-        session()->flash('success', 'Project deleted successfully.');
+    session()->flash('success', 'Project deleted successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Project deleted successfully.');
     }
 
     public function resetForm(): void

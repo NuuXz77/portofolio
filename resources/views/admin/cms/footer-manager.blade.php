@@ -1,4 +1,4 @@
-<section class="rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
+<section class="glass-card rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
     <h2 class="text-lg font-semibold text-white">Footer Management</h2>
     <p class="mt-1 text-sm text-base-content/60">Manage tagline, copyright, CTA text, and social links.</p>
 

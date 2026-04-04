@@ -50,7 +50,7 @@
 @if ($isLegacy)
     @if ($open)
         <div class="modal modal-open">
-            <div class="modal-box {{ $maxWidth }} rounded-2xl {{ $bodyClass }}">
+            <div class="glass-card modal-box {{ $maxWidth }} rounded-2xl {{ $bodyClass }}">
                 @if ($title)
                     <h3 class="text-lg font-semibold text-white">{{ $title }}</h3>
                 @endif
@@ -97,7 +97,7 @@
 
         @teleport('body')
             <dialog x-ref="modal" id="{{ $modalId }}" class="modal backdrop-blur-sm" wire:ignore.self>
-                <div class="{{ $modalSize }} rounded-2xl border border-base-300">
+                <div class="glass-card {{ $modalSize }} rounded-2xl border border-base-300">
                     <form method="dialog">
                         <button type="submit" class="btn btn-circle btn-ghost btn-sm absolute right-2 top-2" @click="closeModal()">✕</button>
                     </form>

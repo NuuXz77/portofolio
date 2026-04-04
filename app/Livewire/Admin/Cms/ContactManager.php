@@ -64,8 +64,8 @@ class ContactManager extends Component
         ]);
 
         AdminActivity::log('updated', 'contact', 'Updated contact info settings.');
-
-        session()->flash('success', 'Contact information updated.');
+    session()->flash('success', 'Contact information updated.');
+    $this->dispatch('app-toast', type: 'success', message: 'Contact information updated.');
     }
 
     public function markAsRead(int $messageId): void
@@ -84,8 +84,8 @@ class ContactManager extends Component
         AdminActivity::log('deleted', 'contact', 'Deleted inbox message.', [
             'message_id' => $messageId,
         ]);
-
-        session()->flash('success', 'Message deleted.');
+    session()->flash('success', 'Message deleted.');
+    $this->dispatch('app-toast', type: 'success', message: 'Message deleted.');
     }
 
     public function render()

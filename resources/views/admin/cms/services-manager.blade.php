@@ -1,27 +1,33 @@
 <section class="space-y-4">
+    @php
+        $columns = [
+            ['label' => 'Title', 'field' => 'title', 'sortable' => true],
+            ['label' => 'Description'],
+            ['label' => 'Icon'],
+            ['label' => 'Visible'],
+            ['label' => 'Order'],
+            ['label' => 'Actions', 'class' => 'text-right w-20'],
+        ];
+    @endphp
+
     <div class="flex flex-wrap items-center justify-between gap-3">
         <x-ui.input-field name="search" wire:model.live.debounce.300ms="search" placeholder="Search service" />
         <button wire:click="openCreateModal" class="btn btn-info rounded-xl text-white">Add Service</button>
     </div>
 
-    <x-ui.table>
-        <x-slot:head>
-                <tr>
-                    <th><button wire:click="sortBy('title')" class="btn btn-ghost btn-xs">Title</button></th>
-                    <th>Description</th>
-                    <th>Icon</th>
-                    <th>Visible</th>
-                    <th>Order</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-        </x-slot:head>
-
-        @forelse ($services as $service)
-            <tr>
+    <x-ui.table
+        :columns="$columns"
+        :data="$services"
+        :sortField="$sortField"
+        :sortDirection="$sortDirection"
+        emptyMessage="No service data found."
+    >
+        @foreach ($services as $service)
+            <tr wire:key="service-{{ $service->id }}">
                 <td>{{ $service->title }}</td>
                 <td class="max-w-md truncate">{{ $service->description }}</td>
                 <td>{{ $service->icon ?: '-' }}</td>
-                <td><span class="badge {{ $service->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $service->is_visible ? 'Yes' : 'No' }}</span></td>
+                <td><span class="badge badge-soft {{ $service->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $service->is_visible ? 'Yes' : 'No' }}</span></td>
                 <td>{{ $service->sort_order }}</td>
                 <td class="text-right">
                     <x-ui.dropdown-action>
@@ -30,9 +36,7 @@
                     </x-ui.dropdown-action>
                 </td>
             </tr>
-        @empty
-            <tr><td colspan="6" class="text-center text-base-content/55">No service data found.</td></tr>
-        @endforelse
+        @endforeach
     </x-ui.table>
 
     <div>{{ $services->links() }}</div>

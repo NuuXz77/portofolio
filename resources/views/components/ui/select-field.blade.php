@@ -60,7 +60,7 @@
             @if($required) required @endif
             @if($disabled) disabled @endif
             {{ $attributes->merge([
-                'class' => trim('select select-bordered w-full rounded-xl '.$extraClass),
+                'class' => trim('select select-bordered glass-field w-full rounded-xl '.$extraClass),
             ]) }}
         >
             @if($placeholder !== null && $placeholder !== '')

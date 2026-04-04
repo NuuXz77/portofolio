@@ -1,4 +1,16 @@
 <section class="space-y-4">
+    @php
+        $columns = [
+            ['label' => 'Name', 'field' => 'name', 'sortable' => true],
+            ['label' => 'Category', 'field' => 'category', 'sortable' => true],
+            ['label' => 'Level', 'field' => 'level', 'sortable' => true],
+            ['label' => 'Icon'],
+            ['label' => 'Order', 'field' => 'sort_order', 'sortable' => true],
+            ['label' => 'Visible'],
+            ['label' => 'Actions', 'class' => 'text-right w-20'],
+        ];
+    @endphp
+
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap gap-2">
             <x-ui.input-field name="search" wire:model.live.debounce.300ms="search" placeholder="Search skill" />
@@ -12,27 +24,21 @@
         <button wire:click="openCreateModal" class="btn btn-info rounded-xl text-white">Add Skill</button>
     </div>
 
-    <x-ui.table>
-        <x-slot:head>
-                <tr>
-                    <th><button wire:click="sortBy('name')" class="btn btn-ghost btn-xs">Name</button></th>
-                    <th><button wire:click="sortBy('category')" class="btn btn-ghost btn-xs">Category</button></th>
-                    <th><button wire:click="sortBy('level')" class="btn btn-ghost btn-xs">Level</button></th>
-                    <th>Icon</th>
-                    <th><button wire:click="sortBy('sort_order')" class="btn btn-ghost btn-xs">Order</button></th>
-                    <th>Visible</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-        </x-slot:head>
-
-        @forelse ($skills as $skill)
-            <tr>
+    <x-ui.table
+        :columns="$columns"
+        :data="$skills"
+        :sortField="$sortField"
+        :sortDirection="$sortDirection"
+        emptyMessage="No skill found."
+    >
+        @foreach ($skills as $skill)
+            <tr wire:key="skill-{{ $skill->id }}">
                 <td>{{ $skill->name }}</td>
                 <td>{{ $skill->category }}</td>
                 <td>{{ $skill->level }}%</td>
                 <td>{{ $skill->icon ?: '-' }}</td>
                 <td>{{ $skill->sort_order }}</td>
-                <td><span class="badge {{ $skill->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $skill->is_visible ? 'Yes' : 'No' }}</span></td>
+                <td><span class="badge badge-soft {{ $skill->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $skill->is_visible ? 'Yes' : 'No' }}</span></td>
                 <td class="text-right">
                     <x-ui.dropdown-action>
                         <li><button type="button" wire:click="openEditModal({{ $skill->id }})">Edit</button></li>
@@ -40,11 +46,7 @@
                     </x-ui.dropdown-action>
                 </td>
             </tr>
-        @empty
-            <tr>
-                <td colspan="7" class="text-center text-base-content/55">No skill found.</td>
-            </tr>
-        @endforelse
+        @endforeach
     </x-ui.table>
 
     <div>{{ $skills->links() }}</div>

@@ -1,5 +1,15 @@
 <section class="grid gap-6 xl:grid-cols-[1.1fr,1.4fr]">
-    <article class="rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
+    @php
+        $menuColumns = [
+            ['label' => 'Label'],
+            ['label' => 'Href'],
+            ['label' => 'Order'],
+            ['label' => 'Visible'],
+            ['label' => 'Actions', 'class' => 'text-right w-20'],
+        ];
+    @endphp
+
+    <article class="glass-card rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
         <h2 class="text-lg font-semibold text-white">Navbar Settings</h2>
         <p class="mt-1 text-sm text-base-content/60">Edit logo and CTA displayed on the landing page.</p>
 
@@ -14,7 +24,7 @@
         </form>
     </article>
 
-    <article class="rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
+    <article class="glass-card rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
                 <h2 class="text-lg font-semibold text-white">Menu Items</h2>
@@ -40,24 +50,20 @@
             </div>
         </form>
 
-        <x-ui.table wrapperClass="mt-5 rounded-xl" tableClass="table-zebra">
-            <x-slot:head>
-                <tr>
-                    <th>Label</th>
-                    <th>Href</th>
-                    <th>Order</th>
-                    <th>Visible</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </x-slot:head>
-
-            @forelse ($menuItems as $item)
-                <tr>
+        <x-ui.table
+            wrapperClass="mt-5 rounded-xl"
+            tableClass="table-zebra"
+            :columns="$menuColumns"
+            :data="$menuItems"
+            emptyMessage="No menu items yet."
+        >
+            @foreach ($menuItems as $item)
+                <tr wire:key="menu-item-{{ $item->id }}">
                     <td>{{ $item->label }}</td>
                     <td>{{ $item->href }}</td>
                     <td>{{ $item->sort_order }}</td>
                     <td>
-                        <span class="badge {{ $item->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $item->is_visible ? 'Yes' : 'No' }}</span>
+                        <span class="badge badge-soft {{ $item->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $item->is_visible ? 'Yes' : 'No' }}</span>
                     </td>
                     <td class="text-right">
                         <x-ui.dropdown-action>
@@ -66,11 +72,7 @@
                         </x-ui.dropdown-action>
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="text-center text-base-content/55">No menu items yet.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </x-ui.table>
     </article>
 </section>

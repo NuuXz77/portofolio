@@ -113,8 +113,8 @@ class TestimonialsManager extends Component
 
         $this->showModal = false;
         $this->resetForm();
-
-        session()->flash('success', 'Testimonial saved successfully.');
+    session()->flash('success', 'Testimonial saved successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Testimonial saved successfully.');
     }
 
     public function delete(int $testimonialId): void
@@ -126,8 +126,8 @@ class TestimonialsManager extends Component
         AdminActivity::log('deleted', 'testimonials', 'Deleted testimonial record.', [
             'name' => $name,
         ]);
-
-        session()->flash('success', 'Testimonial deleted successfully.');
+    session()->flash('success', 'Testimonial deleted successfully.');
+    $this->dispatch('app-toast', type: 'success', message: 'Testimonial deleted successfully.');
     }
 
     public function resetForm(): void

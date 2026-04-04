@@ -31,7 +31,7 @@
                 <td>{{ $experience->role }}</td>
                 <td>{{ $experience->company ?: '-' }}</td>
                 <td class="max-w-md truncate">{{ $experience->description }}</td>
-                <td><span class="badge {{ $experience->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $experience->is_visible ? 'Yes' : 'No' }}</span></td>
+                <td><span class="badge badge-soft {{ $experience->is_visible ? 'badge-success' : 'badge-ghost' }}">{{ $experience->is_visible ? 'Yes' : 'No' }}</span></td>
                 <td>{{ $experience->sort_order }}</td>
                 <td class="text-right">
                     <x-ui.dropdown-action>

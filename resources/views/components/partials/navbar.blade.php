@@ -1,4 +1,4 @@
-<header class="sticky top-0 z-30 border-b border-base-content/10 bg-base-100/85 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+<header class="glass-surface sticky top-0 z-30 border-b border-base-content/10 bg-base-100/85 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
     <div class="flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
             <button id="sidebar-toggle" class="btn btn-ghost btn-sm btn-circle" type="button" aria-label="Toggle sidebar">
@@ -6,7 +6,7 @@
             </button>
             <div>
                 <p class="text-xs uppercase tracking-[0.18em] text-base-content/55">Admin Panel</p>
-                <h1 class="text-lg font-semibold text-white">{{ $title ?? 'Dashboard' }}</h1>
+                <h1 class="text-lg font-semibold text-base-content">{{ $title ?? 'Dashboard' }}</h1>
             </div>
         </div>
 
@@ -26,7 +26,7 @@
                         </div>
                     </div>
                 </button>
-                <ul tabindex="0" class="menu dropdown-content z-20 mt-2 w-52 rounded-box border border-base-content/10 bg-base-100 p-2 shadow-xl">
+                <ul tabindex="0" class="glass-surface-soft menu dropdown-content z-20 mt-2 w-52 rounded-box border border-base-content/10 bg-base-100 p-2 shadow-xl">
                     <li>
                         <a href="{{ route('admin.settings') }}" wire:navigate>
                             <i data-lucide="settings" class="h-4 w-4"></i>

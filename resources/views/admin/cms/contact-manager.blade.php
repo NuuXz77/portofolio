@@ -1,5 +1,16 @@
 <section class="grid gap-6 xl:grid-cols-[1.05fr,1.45fr]">
-    <article class="rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
+    @php
+        $messageColumns = [
+            ['label' => 'Name'],
+            ['label' => 'Email'],
+            ['label' => 'Message'],
+            ['label' => 'Date'],
+            ['label' => 'Status'],
+            ['label' => 'Actions', 'class' => 'text-right w-20'],
+        ];
+    @endphp
+
+    <article class="glass-card rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
         <h2 class="text-lg font-semibold text-white">Contact Info</h2>
         <p class="mt-1 text-sm text-base-content/60">Update contact channels displayed on landing page.</p>
 
@@ -13,7 +24,7 @@
         </form>
     </article>
 
-    <article class="rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
+    <article class="glass-card rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-lg font-semibold text-white">Inbox Messages</h2>
             <div class="flex gap-2">
@@ -26,26 +37,21 @@
             </div>
         </div>
 
-        <x-ui.table wrapperClass="mt-4 rounded-xl" tableClass="table-zebra">
-            <x-slot:head>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Message</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </x-slot:head>
-
-            @forelse ($messages as $message)
-                <tr>
+        <x-ui.table
+            wrapperClass="mt-4 rounded-xl"
+            tableClass="table-zebra"
+            :columns="$messageColumns"
+            :data="$messages"
+            emptyMessage="No messages found."
+        >
+            @foreach ($messages as $message)
+                <tr wire:key="message-{{ $message->id }}">
                     <td>{{ $message->name }}</td>
                     <td>{{ $message->email }}</td>
                     <td class="max-w-sm truncate">{{ $message->message }}</td>
                     <td>{{ $message->created_at->format('d M Y H:i') }}</td>
                     <td>
-                        <span class="badge {{ $message->is_read ? 'badge-ghost' : 'badge-info' }}">{{ $message->is_read ? 'Read' : 'Unread' }}</span>
+                        <span class="badge badge-soft {{ $message->is_read ? 'badge-ghost' : 'badge-info' }}">{{ $message->is_read ? 'Read' : 'Unread' }}</span>
                     </td>
                     <td class="text-right">
                         <x-ui.dropdown-action>
@@ -56,11 +62,7 @@
                         </x-ui.dropdown-action>
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center text-base-content/55">No messages found.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </x-ui.table>
 
         <div class="mt-4">{{ $messages->links() }}</div>

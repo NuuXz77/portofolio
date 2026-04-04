@@ -40,7 +40,7 @@
         @if($maxlength) maxlength="{{ $maxlength }}" @endif
         @if($minlength) minlength="{{ $minlength }}" @endif
         {{ $attributes->merge([
-            'class' => trim('textarea textarea-bordered w-full rounded-xl '.$textareaClass.' '.$stateClass),
+            'class' => trim('textarea textarea-bordered glass-field w-full rounded-xl '.$textareaClass.' '.$stateClass),
         ]) }}
     ></textarea>
 
