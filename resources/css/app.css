@@ -610,20 +610,37 @@ html[data-theme='light'] .app-toast-close:hover {
 }
 
 #mobile-menu-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.5rem);
+    z-index: 60;
+    max-height: none;
+    overflow: hidden;
+    pointer-events: none;
+    visibility: hidden;
     transition:
-        max-height 0.3s ease,
-        opacity 0.3s ease,
-        border-color 0.3s ease,
-        transform 0.3s ease;
+        opacity 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease,
+        visibility 0s linear 0.22s;
     transform-origin: top;
-    transform: translateY(-6px);
+    transform: translateY(-6px) scale(0.985);
+    opacity: 0;
+    will-change: opacity, transform;
 }
 
 #mobile-menu-panel.is-open {
-    max-height: 28rem;
+    pointer-events: auto;
+    visibility: visible;
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     border-color: rgba(255, 255, 255, 0.12);
+    transition:
+        opacity 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.22s ease,
+        visibility 0s linear 0s;
 }
 
 .project-card {
