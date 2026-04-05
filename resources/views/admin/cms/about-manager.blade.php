@@ -7,7 +7,16 @@
 
         <x-ui.textarea-field label="Description (HTML supported)" name="description" wire:model.defer="description" :rows="8" wrapperClass="lg:col-span-2" required />
 
-        <x-ui.textarea-field label="Stats (Format: Label|Value, one per line)" name="statsText" wire:model.defer="statsText" :rows="5" wrapperClass="lg:col-span-2" required />
+        <x-ui.textarea-field
+            label="Stats (1 baris = 1 item)"
+            name="statsText"
+            wire:model.defer="statsText"
+            :rows="6"
+            wrapperClass="lg:col-span-2"
+            placeholder="Projects Deployed | 7+&#10;Experience | 5 Years&#10;Tech Mastery | Multi Stack"
+            hint="Gunakan format Label | Value. Juga mendukung Label:Value atau Label - Value."
+            required
+        />
 
         <x-ui.file-field label="Profile Image" name="profileImage" wire:model="profileImage" accept="image/*" wrapperClass="lg:col-span-2">
             @if ($existingImage)

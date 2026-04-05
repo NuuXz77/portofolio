@@ -4,6 +4,7 @@ namespace App\Livewire\Public\Journal;
 
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Support\PublicNavbarData;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -22,6 +23,9 @@ class Index extends Component
     #[Layout('components.layouts.portfolio')]
     public function render()
     {
+        $brandName = PublicNavbarData::brandName();
+        $navbarData = PublicNavbarData::forJournal();
+
         $articles = Article::query()
             ->with('category:id,name,slug')
             ->publiclyVisible()
@@ -54,6 +58,7 @@ class Index extends Component
             'categories' => $categories,
             'search' => $this->search,
             'activeCategory' => $this->activeCategory,
-        ])->title('My Journal | Wisnu.dev');
+            ...$navbarData,
+        ])->title('My Journal | '.$brandName);
     }
 }

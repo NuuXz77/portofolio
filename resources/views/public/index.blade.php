@@ -155,18 +155,7 @@
     $footerSocials = $footer['socials'] ?? [];
 @endphp
 
-<div id="portfolio" data-portfolio-root class="relative overflow-x-clip bg-base-100 text-base-content">
-    <div aria-hidden="true" class="portfolio-background pointer-events-none">
-        <div class="portfolio-grid"></div>
-        <div class="portfolio-glow portfolio-glow-top-left"></div>
-        <div class="portfolio-glow portfolio-glow-bottom-right"></div>
-        <div class="portfolio-glow portfolio-glow-center"></div>
-        <div class="portfolio-noise"></div>
-        <div class="portfolio-vignette"></div>
-    </div>
-
     <div class="relative z-10">
-        <div id="scroll-progress" class="fixed left-0 top-0 z-50 h-1 w-0 bg-linear-to-r from-cyan-400 via-blue-500 to-violet-500 shadow-[0_0_14px_rgba(80,170,255,0.75)] transition-[width] duration-150"></div>
 
         <x-partials.public-navbar
             :logoText="$logoText"
@@ -649,5 +638,4 @@
                 <span>Message sent successfully. I will get back to you soon.</span>
             </div>
         </div>
-    </div>
 </div>

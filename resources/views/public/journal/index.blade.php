@@ -11,23 +11,19 @@
         return \Illuminate\Support\Facades\Storage::url($path);
     };
 
-    $logoText = 'Wisnu.dev';
-    $navItems = [
-        ['href' => route('home'), 'label' => 'Home'],
-        ['href' => route('journal.index'), 'label' => 'Journal'],
-    ];
+    $logoText = (string) ($logoText ?? 'Wisnu.dev');
+    $navItems = is_array($navItems ?? null) ? $navItems : [];
+    $ctaText = (string) ($ctaText ?? 'Hire Me');
+    $ctaLink = (string) ($ctaLink ?? route('home').'#contact');
 @endphp
 
-<div id="portfolio" data-portfolio-root class="relative overflow-x-clip bg-base-100 text-base-content">
-    <div aria-hidden="true" class="pointer-events-none portfolio-glow"></div>
-    <div aria-hidden="true" class="pointer-events-none portfolio-grid"></div>
-
+<div>
     <x-partials.public-navbar
         :logoText="$logoText"
         :brandHref="route('home')"
         :navItems="$navItems"
-        ctaText="Hire Me"
-        :ctaLink="route('home').'#contact'"
+        :ctaText="$ctaText"
+        :ctaLink="$ctaLink"
     />
 
     <main class="px-4 pb-20 pt-14 sm:px-8 sm:pt-18">

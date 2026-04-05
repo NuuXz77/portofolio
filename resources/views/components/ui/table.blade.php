@@ -33,8 +33,8 @@
     $resolvedEmptyIcon = $isHeroiconAlias ? 'inbox' : $emptyIcon;
 @endphp
 
-<div class="glass-card rounded-2xl border border-base-content/10 bg-base-100 shadow-sm {{ $wrapperClass }}" style="overflow-x: auto; overflow-y: visible !important;">
-    <table class="table {{ $striped ? 'table-zebra' : '' }} {{ $tableClass }}" style="position: relative;">
+<div class="glass-card rounded-2xl border border-base-content/10 bg-base-100 shadow-sm {{ $wrapperClass }} overflow-visible">
+    <table class="table w-full {{ $striped ? 'table-zebra' : '' }} {{ $tableClass }}">
         @if ($hasColumns)
             <thead>
                 <tr>

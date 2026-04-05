@@ -3,6 +3,7 @@
 namespace App\Livewire\Public\Journal;
 
 use App\Models\Article;
+use App\Support\PublicNavbarData;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -59,10 +60,14 @@ class Show extends Component
     #[Layout('components.layouts.portfolio')]
     public function render()
     {
+        $brandName = PublicNavbarData::brandName();
+        $navbarData = PublicNavbarData::forJournal();
+
         return view('public.journal.show', [
             'article' => $this->article,
             'relatedArticles' => $this->relatedArticles,
             'isPrivatePreview' => $this->isPrivatePreview,
-        ])->title(($this->article->seo_title ?: $this->article->title).' | Wisnu.dev');
+            ...$navbarData,
+        ])->title(($this->article->seo_title ?: $this->article->title).' | '.$brandName);
     }
 }

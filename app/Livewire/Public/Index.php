@@ -10,6 +10,7 @@ use App\Models\Service;
 use App\Models\Skill;
 use App\Models\Testimonial;
 use App\Support\PortfolioContent;
+use App\Support\PublicNavbarData;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -18,10 +19,18 @@ class Index extends Component
     #[Layout('components.layouts.portfolio')]
     public function render()
     {
+        $brandName = PublicNavbarData::brandName();
+        $fallbackBrandTitle = $brandName.' | Fullstack Web Developer';
+
         $seo = PortfolioContent::get('seo', [
-            'title' => 'Wisnu.dev | Fullstack Web Developer',
+            'title' => $fallbackBrandTitle,
             'description' => 'Portfolio and CMS powered website for fullstack engineering services.',
         ]);
+
+        $seoTitle = trim((string) ($seo['title'] ?? ''));
+        $resolvedTitle = ($seoTitle !== '' && strcasecmp($seoTitle, 'Wisnu.dev | Fullstack Web Developer') !== 0)
+            ? $seoTitle
+            : $fallbackBrandTitle;
 
         $menuItems = MenuItem::query()
             ->where('is_visible', true)
@@ -75,6 +84,6 @@ class Index extends Component
             'experiences' => Experience::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
             'services' => Service::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
             'testimonials' => Testimonial::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
-        ])->title($seo['title'] ?? 'Wisnu.dev | Fullstack Web Developer');
+        ])->title($resolvedTitle);
     }
 }

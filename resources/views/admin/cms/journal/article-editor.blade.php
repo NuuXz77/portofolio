@@ -34,7 +34,7 @@
                     <span class="text-xs text-base-content/55">Supports heading, list, link, image, code block</span>
                 </div>
 
-                <div data-journal-editor data-model-input="journal-content-input" class="glass-card-soft rounded-xl border border-base-content/15 bg-base-100">
+                <div wire:ignore data-journal-editor data-model-input="journal-content-input" class="glass-card-soft rounded-xl border border-base-content/15 bg-base-100">
                     <div data-journal-editor-area class="journal-editor min-h-72"></div>
                 </div>
 

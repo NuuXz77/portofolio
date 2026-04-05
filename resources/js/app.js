@@ -14,7 +14,8 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
 let iconRenderQueued = false;
-let iconObserverAttached = false;
+let iconMutationObserver = null;
+let iconObserverRoot = null;
 let typingRoleTimeoutId = null;
 let visitorHeartbeatIntervalId = null;
 let liveUsersPollIntervalId = null;
@@ -23,6 +24,7 @@ let liveUsersChart = null;
 let liveUsersRoot = null;
 let skillProgressObserver = null;
 let appToastLivewireBound = false;
+let dropdownActionsGlobalBound = false;
 
 const initGlobalIcons = () => {
 	try {
@@ -50,11 +52,21 @@ const queueIconRender = () => {
 };
 
 const attachIconObserver = () => {
-	if (iconObserverAttached || !document.body) {
+	if (!document.body) {
 		return;
 	}
 
-	const observer = new MutationObserver((mutations) => {
+	if (iconMutationObserver && iconObserverRoot === document.body) {
+		return;
+	}
+
+	if (iconMutationObserver) {
+		iconMutationObserver.disconnect();
+		iconMutationObserver = null;
+		iconObserverRoot = null;
+	}
+
+	iconMutationObserver = new MutationObserver((mutations) => {
 		for (const mutation of mutations) {
 			for (const node of mutation.addedNodes) {
 				if (!(node instanceof HTMLElement)) {
@@ -69,12 +81,141 @@ const attachIconObserver = () => {
 		}
 	});
 
-	observer.observe(document.body, {
+	iconMutationObserver.observe(document.body, {
 		childList: true,
 		subtree: true,
 	});
 
-	iconObserverAttached = true;
+	iconObserverRoot = document.body;
+};
+
+const refreshIconRuntime = () => {
+	attachIconObserver();
+	queueIconRender();
+
+	window.setTimeout(() => {
+		queueIconRender();
+	}, 0);
+};
+
+const scrollToCurrentHashTarget = () => {
+	const hash = window.location.hash;
+
+	if (!hash || hash === '#') {
+		return;
+	}
+
+	const targetId = window.decodeURIComponent(hash.slice(1));
+
+	if (!targetId) {
+		return;
+	}
+
+	const target = document.getElementById(targetId);
+
+	if (!(target instanceof HTMLElement)) {
+		return;
+	}
+
+	const topOffset = 110;
+	const top = Math.max(target.getBoundingClientRect().top + window.scrollY - topOffset, 0);
+
+	window.scrollTo({
+		top,
+		behavior: 'smooth',
+	});
+};
+
+const syncHashScroll = () => {
+	window.requestAnimationFrame(() => {
+		scrollToCurrentHashTarget();
+
+		window.setTimeout(() => {
+			scrollToCurrentHashTarget();
+		}, 80);
+	});
+};
+
+const closeDropdownAction = (dropdown) => {
+	if (!(dropdown instanceof HTMLElement)) {
+		return;
+	}
+
+	dropdown.classList.remove('dropdown-open');
+
+	const trigger = dropdown.querySelector('[data-dropdown-trigger]');
+
+	if (trigger instanceof HTMLElement) {
+		trigger.setAttribute('aria-expanded', 'false');
+	}
+};
+
+const closeAllDropdownActions = () => {
+	document.querySelectorAll('[data-dropdown-action].dropdown-open').forEach((dropdown) => {
+		closeDropdownAction(dropdown);
+	});
+};
+
+const initDropdownActions = () => {
+	if (dropdownActionsGlobalBound) {
+		return;
+	}
+
+	document.addEventListener('click', (event) => {
+		if (!(event.target instanceof Element)) {
+			return;
+		}
+
+		const trigger = event.target.closest('[data-dropdown-trigger]');
+
+		if (trigger instanceof HTMLElement) {
+			const dropdown = trigger.closest('[data-dropdown-action]');
+
+			if (!(dropdown instanceof HTMLElement)) {
+				return;
+			}
+
+			event.preventDefault();
+			event.stopPropagation();
+
+			const isOpen = dropdown.classList.contains('dropdown-open');
+			closeAllDropdownActions();
+
+			if (!isOpen) {
+				dropdown.classList.add('dropdown-open');
+				trigger.setAttribute('aria-expanded', 'true');
+			}
+
+			return;
+		}
+
+		const insideDropdown = event.target.closest('[data-dropdown-action]');
+
+		if (insideDropdown instanceof HTMLElement) {
+			const menuItem = event.target.closest('[data-dropdown-menu] a, [data-dropdown-menu] button');
+
+			if (menuItem instanceof HTMLElement) {
+				window.setTimeout(() => {
+					closeDropdownAction(insideDropdown);
+				}, 0);
+			}
+
+			return;
+		}
+
+		closeAllDropdownActions();
+	});
+
+	document.addEventListener('keydown', (event) => {
+		if (event.key === 'Escape') {
+			closeAllDropdownActions();
+		}
+	});
+
+	document.addEventListener('livewire:navigating', closeAllDropdownActions);
+	document.addEventListener('livewire:navigated', closeAllDropdownActions);
+
+	dropdownActionsGlobalBound = true;
 };
 
 const ensureToastStack = () => {
@@ -1181,10 +1322,11 @@ const initAdminLiveUsersChart = () => {
 };
 
 const initApp = () => {
-	initGlobalIcons();
-	attachIconObserver();
+	refreshIconRuntime();
+	initDropdownActions();
 	initAppToasts();
 	initPortfolioPage();
+	syncHashScroll();
 	initJournalEditors();
 	initVisitorHeartbeat();
 	initAdminLiveUsersChart();
@@ -1192,17 +1334,21 @@ const initApp = () => {
 
 document.addEventListener('DOMContentLoaded', initApp);
 document.addEventListener('livewire:navigated', () => {
-	queueIconRender();
+	refreshIconRuntime();
+	initDropdownActions();
 	initAppToasts();
 	initPortfolioPage();
+	syncHashScroll();
 	initJournalEditors();
 	initVisitorHeartbeat();
 	initAdminLiveUsersChart();
 });
 document.addEventListener('livewire:init', () => {
-	queueIconRender();
+	refreshIconRuntime();
+	initDropdownActions();
 	initAppToasts();
 	initPortfolioPage();
+	syncHashScroll();
 	initJournalEditors();
 	initVisitorHeartbeat();
 	initAdminLiveUsersChart();
