@@ -129,63 +129,43 @@ html[data-theme='light'] .premium-bg-root.premium-bg-admin {
         linear-gradient(90deg, var(--portfolio-grid-color) 1px, transparent 1px);
     background-size: var(--portfolio-grid-size) var(--portfolio-grid-size);
     mask-image: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.95) 30%, rgba(0, 0, 0, 0.45) 75%, transparent 100%);
-}
-    width: min(100%, 42rem);
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 16px 45px rgba(2, 6, 23, 0.32);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 0.7rem 1.15rem;
-    z-index: 0;
-    overflow: hidden;
-    contain: paint;
+    -webkit-mask-image: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.95) 30%, rgba(0, 0, 0, 0.45) 75%, transparent 100%);
 }
 
 .portfolio-background::before,
 .portfolio-background::after,
 .premium-background::before,
-    gap: 0.85rem;
+.premium-background::after {
     content: '';
     position: absolute;
-    animation: tech-logo-marquee 32s linear infinite;
     bottom: -6%;
     width: clamp(7rem, 14vw, 15rem);
     pointer-events: none;
     z-index: 0;
-    height: 3rem;
-    width: 3rem;
-    flex: 0 0 auto;
-    will-change: transform;
+    filter: blur(18px);
+    opacity: 0.56;
 }
-    border-radius: 0.8rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(0);
-    transition: transform 0.32s ease, border-color 0.32s ease, box-shadow 0.32s ease, background-color 0.32s ease;
+
+.portfolio-background::before,
+.premium-background::before {
+    left: -4rem;
     background: linear-gradient(90deg, var(--portfolio-side-left) 0%, transparent 72%);
     animation: portfolio-side-drift 24s ease-in-out infinite;
 }
-    position: relative;
-    z-index: 1;
-    height: 1.5rem;
-    width: 1.5rem;
-    opacity: 0.64;
-    filter: grayscale(1) saturate(0.15);
-    transition: filter 0.32s ease, opacity 0.32s ease, transform 0.32s ease;
+
+.portfolio-background::after,
+.premium-background::after {
+    right: -4rem;
+    background: linear-gradient(270deg, var(--portfolio-side-right) 0%, transparent 72%);
     animation: portfolio-side-drift 28s ease-in-out infinite reverse;
 }
 
-    transform: translateY(-4px);
-    border-color: rgba(125, 211, 252, 0.42);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 12px 24px rgba(56, 189, 248, 0.22);
+.portfolio-glow,
+.premium-glow {
     position: absolute;
     z-index: 0;
     width: clamp(18rem, 34vw, 34rem);
     height: clamp(18rem, 34vw, 34rem);
-    filter: grayscale(0) saturate(1);
     opacity: var(--portfolio-glow-opacity);
     filter: blur(110px);
     will-change: transform;
@@ -991,16 +971,18 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
 
 .tech-logo-marquee {
     position: relative;
-    width: min(100%, 42rem);
+    width: 100%;
+    max-width: 100%;
     margin-inline: auto;
     overflow: hidden;
+    box-sizing: border-box;
     border-radius: 9999px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.05);
     box-shadow: 0 16px 45px rgba(2, 6, 23, 0.32);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    padding: 0.62rem 1rem;
+    padding: var(--tech-pad-y, 0.62rem) var(--tech-pad-x, 1rem);
     mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
 }
@@ -1009,17 +991,17 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
     display: flex;
     width: max-content;
     align-items: center;
-    gap: 0.66rem;
+    gap: var(--tech-gap, 0.66rem);
     will-change: transform;
     transform: translate3d(0, 0, 0);
-    animation: tech-logo-marquee 28s linear infinite;
+    animation: tech-logo-marquee var(--tech-speed, 28s) linear infinite;
 }
 
 .tech-logo-item {
     position: relative;
     display: inline-flex;
-    height: 2.7rem;
-    width: 2.7rem;
+    height: var(--tech-item-size, 2.7rem);
+    width: var(--tech-item-size, 2.7rem);
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
@@ -1067,8 +1049,8 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
 .tech-logo-icon {
     position: relative;
     z-index: 1;
-    height: 1.28rem;
-    width: 1.28rem;
+    height: var(--tech-icon-size, 1.28rem);
+    width: var(--tech-icon-size, 1.28rem);
     opacity: 0.64;
     filter: grayscale(1) saturate(0.15);
     transition: filter 0.26s ease, opacity 0.26s ease, transform 0.26s ease;
@@ -1096,7 +1078,7 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 3.6rem;
+    width: var(--tech-fade-size, 3.6rem);
     z-index: 3;
 }
 
@@ -1152,32 +1134,6 @@ html[data-theme='light'] .tech-logo-fade-left {
 
 html[data-theme='light'] .tech-logo-fade-right {
     background: linear-gradient(to left, rgba(248, 250, 252, 0.96), transparent);
-}
-
-@media (max-width: 640px) {
-    .tech-logo-marquee {
-        width: 100%;
-        padding: 0.5rem 0.72rem;
-    }
-
-    .tech-logo-track {
-        gap: 0.5rem;
-        animation-duration: 32s;
-    }
-
-    .tech-logo-item {
-        height: 2.25rem;
-        width: 2.25rem;
-    }
-
-    .tech-logo-icon {
-        height: 1.05rem;
-        width: 1.05rem;
-    }
-
-    .tech-logo-fade {
-        width: 2rem;
-    }
 }
 
 .error-fade-in {
