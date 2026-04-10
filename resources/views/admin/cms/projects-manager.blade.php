@@ -17,11 +17,14 @@
             <x-ui.select-field name="categoryFilter" wire:model.live="categoryFilter">
                 <option value="all">All Category</option>
                 @foreach ($categories as $category)
-                    <option value="{{ $category }}">{{ $category }}</option>
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
                 @endforeach
             </x-ui.select-field>
         </div>
-        <button wire:click="openCreateModal" class="btn btn-info rounded-xl text-white">Add Project</button>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('admin.portfolio.categories') }}" wire:navigate class="btn btn-outline rounded-xl">Manage Categories</a>
+            <button wire:click="openCreateModal" class="btn btn-info rounded-xl text-white">Add Project</button>
+        </div>
     </div>
 
     <x-ui.table
@@ -34,7 +37,7 @@
         @foreach ($projects as $project)
             <tr wire:key="project-{{ $project->id }}">
                 <td>{{ $project->title }}</td>
-                <td>{{ $project->category }}</td>
+                <td>{{ $project->portfolioCategory?->name ?? $project->category }}</td>
                 <td>
                     <div class="flex max-w-xs flex-wrap gap-1">
                         @foreach (($project->tech_stack ?? []) as $tag)
@@ -66,10 +69,11 @@
             <x-ui.input-field label="Tech Stack (comma separated)" name="techStack" wire:model.defer="techStack" placeholder="Laravel, Livewire, MySQL" required />
 
             <div class="grid gap-3 sm:grid-cols-2">
-                <x-ui.select-field label="Category" name="category" wire:model.defer="category">
-                    <option value="web-app">Web App</option>
-                    <option value="api">API</option>
-                    <option value="dashboard">Dashboard</option>
+                <x-ui.select-field label="Category" name="categoryId" wire:model.defer="categoryId" required>
+                    <option value="">Select Category</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
                 </x-ui.select-field>
 
                 <x-ui.input-field label="Sort Order" name="sortOrder" type="number" min="0" wire:model.defer="sortOrder" required />

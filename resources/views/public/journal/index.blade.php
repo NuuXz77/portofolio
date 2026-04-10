@@ -28,37 +28,51 @@
 
     <main class="px-4 pb-20 pt-14 sm:px-8 sm:pt-18">
         <section class="mx-auto max-w-7xl">
-            <div class="text-center" data-aos="fade-up" data-aos-duration="700">
+            <div class="text-center" wire:ignore>
                 <p class="text-sm uppercase tracking-[0.24em] text-info">Journal</p>
                 <h1 class="mt-3 text-4xl font-semibold text-base-content sm:text-5xl">My Journal</h1>
                 <p class="mx-auto mt-4 max-w-2xl text-base text-base-content/70 sm:text-lg">Thoughts, experiences, and daily activities</p>
             </div>
 
-            <form method="GET" action="{{ route('journal.index') }}" class="portfolio-glass mx-auto mt-10 grid max-w-4xl gap-3 rounded-2xl border border-white/10 p-4 shadow-xl md:grid-cols-[1fr,220px,auto]">
-                <x-ui.input-field
-                    name="search"
-                    :value="$search"
-                    placeholder="Search article..."
-                    icon="search"
-                    inputClass="bg-base-100/60 border-white/15"
-                />
+            <div class="portfolio-glass mx-auto mt-10 max-w-4xl rounded-2xl border border-white/10 p-4 shadow-xl sm:p-5">
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-xs uppercase tracking-[0.22em] text-base-content/60">Live Filter</p>
+                    <span wire:loading.delay class="text-xs text-info">Updating results...</span>
+                </div>
 
-                <x-ui.select-field
-                    name="category"
-                    :value="$activeCategory"
-                    placeholder="All Category"
-                    selectClass="bg-base-100/60 border-white/15"
-                >
-                    <option value="">All Category</option>
-                    @foreach ($categories as $category)
-                        <option value="{{ $category->slug }}" @selected($activeCategory === $category->slug)>
-                            {{ $category->name }} ({{ $category->public_articles_count }})
-                        </option>
-                    @endforeach
-                </x-ui.select-field>
+                <div class="grid gap-3 md:grid-cols-[1fr,230px,auto] md:items-end">
+                    <x-ui.input-field
+                        name="search"
+                        wire:model.live.debounce.350ms="search"
+                        placeholder="Search article..."
+                        icon="search"
+                        inputClass="bg-base-100/60 border-white/15"
+                    />
 
-                <button type="submit" class="btn btn-info rounded-xl text-white">Filter</button>
-            </form>
+                    <x-ui.select-field
+                        name="category"
+                        wire:model.live="activeCategory"
+                        placeholder="All Category"
+                        selectClass="bg-base-100/60 border-white/15"
+                    >
+                        <option value="">All Category</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->slug }}">
+                                {{ $category->name }} ({{ $category->public_articles_count }})
+                            </option>
+                        @endforeach
+                    </x-ui.select-field>
+
+                    <button
+                        type="button"
+                        wire:click="clearFilters"
+                        @disabled($search === '' && $activeCategory === '')
+                        class="btn btn-outline rounded-xl md:mb-1"
+                    >
+                        Reset
+                    </button>
+                </div>
+            </div>
 
             <div class="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
                 @forelse ($articles as $article)

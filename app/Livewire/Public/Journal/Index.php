@@ -7,12 +7,32 @@ use App\Models\ArticleCategory;
 use App\Support\PublicNavbarData;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Index extends Component
 {
+    use WithPagination;
+
     public string $search = '';
 
     public string $activeCategory = '';
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingActiveCategory(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->activeCategory = '';
+        $this->resetPage();
+    }
 
     public function mount(): void
     {

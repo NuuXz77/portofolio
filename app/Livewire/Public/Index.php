@@ -39,18 +39,21 @@ class Index extends Component
             ->get();
 
         $skills = Skill::query()
+            ->with('portfolioCategory:id,name')
             ->where('is_visible', true)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
 
         $projects = Project::query()
+            ->with('portfolioCategory:id,name,slug')
             ->where('is_visible', true)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
 
         $featuredProjects = Project::query()
+            ->with('portfolioCategory:id,name,slug')
             ->where('is_visible', true)
             ->where('is_featured', true)
             ->orderBy('sort_order')
@@ -69,6 +72,20 @@ class Index extends Component
             $featuredProjects = $projects->take(3)->values();
         }
 
+        $projectCategoryFilters = $projects
+            ->map(function (Project $project): array {
+                $value = trim((string) ($project->portfolioCategory?->slug ?? $project->category));
+                $label = trim((string) ($project->portfolioCategory?->name ?? str_replace('-', ' ', (string) $project->category)));
+
+                return [
+                    'value' => $value,
+                    'label' => $label !== '' ? ucfirst($label) : 'Uncategorized',
+                ];
+            })
+            ->filter(static fn (array $item): bool => $item['value'] !== '')
+            ->unique('value')
+            ->values();
+
         return view('public.index', [
             'seo' => $seo,
             'navbar' => PortfolioContent::get('navbar', []),
@@ -77,8 +94,9 @@ class Index extends Component
             'contactInfo' => PortfolioContent::get('contact_info', []),
             'footer' => PortfolioContent::get('footer', []),
             'menuItems' => $menuItems,
-            'skillsByCategory' => $skills->groupBy('category'),
+            'skillsByCategory' => $skills->groupBy(fn (Skill $skill): string => trim((string) ($skill->portfolioCategory?->name ?? $skill->category)) ?: 'Other'),
             'projects' => $projects,
+            'projectCategoryFilters' => $projectCategoryFilters,
             'featuredProjects' => $featuredProjects,
             'latestArticles' => $latestArticles,
             'experiences' => Experience::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),

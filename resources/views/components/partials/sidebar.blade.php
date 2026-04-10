@@ -4,6 +4,7 @@
         ['route' => 'admin.navbar', 'active' => ['admin.navbar'], 'label' => 'Navbar Management', 'icon' => 'menu'],
         ['route' => 'admin.hero', 'active' => ['admin.hero'], 'label' => 'Hero Section', 'icon' => 'zap'],
         ['route' => 'admin.about', 'active' => ['admin.about'], 'label' => 'About Section', 'icon' => 'user'],
+        ['route' => 'admin.portfolio.categories', 'active' => ['admin.portfolio.categories'], 'label' => 'Portfolio Categories', 'icon' => 'folder-tree'],
         ['route' => 'admin.skills', 'active' => ['admin.skills'], 'label' => 'Skills Management', 'icon' => 'cpu'],
         ['route' => 'admin.projects', 'active' => ['admin.projects'], 'label' => 'Projects Management', 'icon' => 'folder'],
         ['route' => 'admin.experiences', 'active' => ['admin.experiences'], 'label' => 'Experience Management', 'icon' => 'clock'],

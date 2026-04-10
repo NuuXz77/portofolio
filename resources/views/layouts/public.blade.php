@@ -16,18 +16,19 @@
             $defaultTitle = $seoTitle !== '' && ! $isSeedSeoTitle
                 ? $seoTitle
                 : ($brandName.' | Fullstack Web Developer');
+
             $defaultDescription = (string) ($seo['description'] ?? 'Premium personal portfolio of a Fullstack Web Developer focused on scalable web apps, API development, and DevOps deployment.');
             $defaultKeywords = (string) ($seo['keywords'] ?? 'fullstack developer, laravel developer, nextjs developer, devops engineer, portfolio');
             $defaultAuthor = $brandName;
 
-            $metaTitle = trim((string) ($title ?? $defaultTitle));
-            $metaDescription = trim((string) ($description ?? $defaultDescription));
-            $metaKeywords = trim((string) ($keywords ?? $defaultKeywords));
-            $metaAuthor = trim((string) ($author ?? $defaultAuthor));
+            $metaTitle = trim((string) $__env->yieldContent('title', $defaultTitle));
+            $metaDescription = trim((string) $__env->yieldContent('description', $defaultDescription));
+            $metaKeywords = trim((string) $__env->yieldContent('keywords', $defaultKeywords));
+            $metaAuthor = trim((string) $__env->yieldContent('author', $defaultAuthor));
 
-            $metaOgTitle = trim((string) ($ogTitle ?? $metaTitle));
-            $metaOgDescription = trim((string) ($ogDescription ?? $metaDescription));
-            $metaOgImage = trim((string) ($ogImage ?? 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1600&q=80'));
+            $metaOgTitle = trim((string) $__env->yieldContent('og_title', $metaTitle));
+            $metaOgDescription = trim((string) $__env->yieldContent('og_description', $metaDescription));
+            $metaOgImage = trim((string) $__env->yieldContent('og_image', 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1600&q=80'));
 
             if ($metaTitle === '') {
                 $metaTitle = $defaultTitle;
@@ -42,7 +43,7 @@
             }
 
             if ($metaAuthor === '') {
-                $metaAuthor = $brandName;
+                $metaAuthor = $defaultAuthor;
             }
 
             if ($metaOgTitle === '') {
@@ -67,21 +68,13 @@
         <meta name="keywords" content="{{ $metaKeywords }}">
         <meta name="author" content="{{ $metaAuthor }}">
         <meta name="robots" content="index, follow">
-        <meta name="simple-icons-cdn" content="{{ $simpleIconsCdn }}">
 
         <meta property="og:type" content="website">
         <meta property="og:title" content="{{ $metaOgTitle }}">
         <meta property="og:description" content="{{ $metaOgDescription }}">
         <meta property="og:image" content="{{ $metaOgImage }}">
 
-        <script>
-            window.__appCdn = Object.assign({}, window.__appCdn || {}, {
-                simpleIcons: @js($simpleIconsCdn),
-            });
-        </script>
-
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @livewireStyles
     </head>
     <body class="portfolio-root bg-base-100 text-base-content antialiased">
         <div id="portfolio" data-portfolio-root class="relative overflow-x-clip bg-base-100 text-base-content">
@@ -93,14 +86,10 @@
                 <div class="portfolio-noise"></div>
                 <div class="portfolio-vignette"></div>
             </div>
-            <div id="scroll-progress" class="fixed left-0 top-0 z-50 h-1 w-0 bg-linear-to-r from-cyan-400 via-blue-500 to-violet-500 shadow-[0_0_14px_rgba(80,170,255,0.75)] transition-[width] duration-150"></div>
-
 
             <div class="relative z-10">
-                {{ $slot }}
+                @yield('content')
             </div>
         </div>
-
-        @livewireScripts
     </body>
 </html>

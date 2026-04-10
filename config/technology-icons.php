@@ -1,0 +1,28 @@
+<?php
+
+return [
+    ['name' => 'React', 'slug' => 'react', 'color' => '61DAFB'],
+    ['name' => 'Next.js', 'slug' => 'nextdotjs', 'color' => '000000'],
+    ['name' => 'Vue.js', 'slug' => 'vuedotjs', 'color' => '4FC08D'],
+    ['name' => 'Nuxt', 'slug' => 'nuxtdotjs', 'color' => '00DC82'],
+    ['name' => 'Laravel', 'slug' => 'laravel', 'color' => 'FF2D20'],
+    ['name' => 'Livewire', 'slug' => 'livewire', 'color' => 'FB70A9'],
+    ['name' => 'PHP', 'slug' => 'php', 'color' => '777BB4'],
+    ['name' => 'Node.js', 'slug' => 'nodedotjs', 'color' => '339933'],
+    ['name' => 'Express', 'slug' => 'express', 'color' => '000000'],
+    ['name' => 'JavaScript', 'slug' => 'javascript', 'color' => 'F7DF1E'],
+    ['name' => 'TypeScript', 'slug' => 'typescript', 'color' => '3178C6'],
+    ['name' => 'Tailwind CSS', 'slug' => 'tailwindcss', 'color' => '06B6D4'],
+    ['name' => 'MySQL', 'slug' => 'mysql', 'color' => '4479A1'],
+    ['name' => 'PostgreSQL', 'slug' => 'postgresql', 'color' => '4169E1'],
+    ['name' => 'MongoDB', 'slug' => 'mongodb', 'color' => '47A248'],
+    ['name' => 'Redis', 'slug' => 'redis', 'color' => 'DC382D'],
+    ['name' => 'Docker', 'slug' => 'docker', 'color' => '2496ED'],
+    ['name' => 'Kubernetes', 'slug' => 'kubernetes', 'color' => '326CE5'],
+    ['name' => 'Git', 'slug' => 'git', 'color' => 'F05032'],
+    ['name' => 'GitHub', 'slug' => 'github', 'color' => '181717'],
+    ['name' => 'Linux', 'slug' => 'linux', 'color' => 'FCC624'],
+    ['name' => 'Nginx', 'slug' => 'nginx', 'color' => '009639'],
+    ['name' => 'AWS', 'slug' => 'amazonwebservices', 'color' => 'FF9900'],
+    ['name' => 'Figma', 'slug' => 'figma', 'color' => 'F24E1E'],
+];

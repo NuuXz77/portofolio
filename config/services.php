@@ -35,4 +35,6 @@ return [
         ],
     ],
 
+    'simple_icons_cdn' => env('SIMPLE_ICONS_CDN', 'https://cdn.simpleicons.org'),
+
 ];

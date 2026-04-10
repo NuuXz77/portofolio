@@ -10,6 +10,7 @@ use App\Livewire\Admin\Cms\Journal\ArticleEditor;
 use App\Livewire\Admin\Cms\Journal\ArticlesManager;
 use App\Livewire\Admin\Cms\Journal\CategoriesManager;
 use App\Livewire\Admin\Cms\NavbarManager;
+use App\Livewire\Admin\Cms\PortfolioCategoriesManager;
 use App\Livewire\Admin\Cms\ProjectsManager;
 use App\Livewire\Admin\Cms\ServicesManager;
 use App\Livewire\Admin\Cms\SettingsManager;
@@ -51,6 +52,7 @@ Route::middleware(['auth', 'admin'])
 		Route::get('/hero', HeroManager::class)->name('hero');
 		Route::get('/about', AboutManager::class)->name('about');
 		Route::get('/skills', SkillsManager::class)->name('skills');
+		Route::get('/portfolio-categories', PortfolioCategoriesManager::class)->name('portfolio.categories');
 		Route::get('/projects', ProjectsManager::class)->name('projects');
 		Route::get('/experiences', ExperiencesManager::class)->name('experiences');
 		Route::get('/services', ServicesManager::class)->name('services');

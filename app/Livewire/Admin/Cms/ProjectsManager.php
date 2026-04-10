@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Admin\Cms;
 
+use App\Models\PortfolioCategory;
 use App\Models\Project;
 use App\Support\AdminActivity;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -38,7 +40,7 @@ class ProjectsManager extends Component
 
     public string $githubLink = '';
 
-    public string $category = 'web-app';
+    public string $categoryId = '';
 
     public bool $isFeatured = false;
 
@@ -77,6 +79,9 @@ class ProjectsManager extends Component
     public function openCreateModal(): void
     {
         $this->resetForm();
+        if ($this->categoryId === '') {
+            $this->categoryId = (string) $this->resolveDefaultCategoryId();
+        }
         $this->showModal = true;
     }
 
@@ -90,7 +95,7 @@ class ProjectsManager extends Component
         $this->techStack = implode(', ', $project->tech_stack ?? []);
         $this->demoLink = $project->demo_link ?? '';
         $this->githubLink = $project->github_link ?? '';
-        $this->category = $project->category;
+        $this->categoryId = (string) ($project->category_id ?: $this->resolveCategoryIdByName($project->category));
         $this->isFeatured = $project->is_featured;
         $this->isVisible = $project->is_visible;
         $this->sortOrder = $project->sort_order;
@@ -106,12 +111,20 @@ class ProjectsManager extends Component
             'techStack' => ['required', 'string', 'max:1000'],
             'demoLink' => ['nullable', 'string', 'max:255'],
             'githubLink' => ['nullable', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:60'],
+            'categoryId' => [
+                'required',
+                'integer',
+                Rule::exists('portfolio_categories', 'id')->where('type', 'project'),
+            ],
             'sortOrder' => ['required', 'integer', 'min:0'],
             'isFeatured' => ['required', 'boolean'],
             'isVisible' => ['required', 'boolean'],
             'projectImage' => ['nullable', 'image', 'max:3072'],
         ]);
+
+        $category = PortfolioCategory::query()
+            ->project()
+            ->findOrFail((int) $this->categoryId);
 
         $imagePath = $this->existingImage;
 
@@ -135,7 +148,8 @@ class ProjectsManager extends Component
                 'image_path' => $imagePath,
                 'demo_link' => $this->demoLink ?: null,
                 'github_link' => $this->githubLink ?: null,
-                'category' => $this->category,
+                'category' => $category->slug,
+                'category_id' => $category->id,
                 'is_featured' => $this->isFeatured,
                 'is_visible' => $this->isVisible,
                 'sort_order' => $this->sortOrder,
@@ -178,7 +192,7 @@ class ProjectsManager extends Component
             'projectImage',
         ]);
 
-        $this->category = 'web-app';
+        $this->categoryId = (string) $this->resolveDefaultCategoryId();
         $this->isFeatured = false;
         $this->isVisible = true;
         $this->sortOrder = 0;
@@ -188,14 +202,46 @@ class ProjectsManager extends Component
     public function render()
     {
         $query = Project::query()
+            ->with('portfolioCategory:id,name,slug')
             ->when($this->search !== '', fn ($builder) => $builder->where('title', 'like', '%'.$this->search.'%'))
-            ->when($this->categoryFilter !== 'all', fn ($builder) => $builder->where('category', $this->categoryFilter))
+            ->when($this->categoryFilter !== 'all', fn ($builder) => $builder->where('category_id', (int) $this->categoryFilter))
             ->orderBy($this->sortField, $this->sortDirection)
             ->orderBy('id');
 
         return view('admin.cms.projects-manager', [
             'projects' => $query->paginate(8),
-            'categories' => Project::query()->select('category')->distinct()->orderBy('category')->pluck('category'),
+            'categories' => PortfolioCategory::query()->project()->orderBy('sort_order')->orderBy('name')->get(['id', 'name', 'slug']),
         ]);
+    }
+
+    protected function resolveDefaultCategoryId(): int
+    {
+        $id = PortfolioCategory::query()
+            ->project()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->value('id');
+
+        return $id ? (int) $id : 0;
+    }
+
+    protected function resolveCategoryIdByName(?string $value): int
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return 0;
+        }
+
+        $id = PortfolioCategory::query()
+            ->project()
+            ->where(function ($query) use ($value): void {
+                $query
+                    ->whereRaw('LOWER(name) = ?', [strtolower($value)])
+                    ->orWhereRaw('LOWER(slug) = ?', [strtolower($value)]);
+            })
+            ->value('id');
+
+        return $id ? (int) $id : 0;
     }
 }

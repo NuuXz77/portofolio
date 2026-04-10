@@ -77,6 +77,64 @@
     $aboutStats = $about['stats'] ?? [];
     $aboutImage = $resolveAsset($about['image'] ?? null, 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=80');
 
+    $defaultTechnologyLogos = collect(config('technology-icons', []))
+        ->map(function (array $icon): array {
+            return [
+                'name' => (string) ($icon['name'] ?? 'Tech'),
+                'slug' => strtolower((string) ($icon['slug'] ?? '')),
+                'color' => strtoupper((string) ($icon['color'] ?? '9CA3AF')),
+            ];
+        })
+        ->filter(static fn (array $icon): bool => $icon['slug'] !== '')
+        ->unique('slug')
+        ->values();
+
+    $technologyLogos = collect($skillsByCategory)
+        ->flatten(1)
+        ->map(function ($skill): ?array {
+            $rawIcon = trim((string) ($skill->icon ?? ''));
+
+            if (! str_starts_with($rawIcon, 'si:')) {
+                return null;
+            }
+
+            $parts = explode(':', $rawIcon, 3);
+            $slug = strtolower(trim((string) ($parts[1] ?? '')));
+            $color = strtoupper(trim((string) ($parts[2] ?? '9CA3AF')));
+
+            if ($slug === '') {
+                return null;
+            }
+
+            return [
+                'name' => trim((string) ($skill->name ?? $slug)),
+                'slug' => $slug,
+                'color' => $color !== '' ? $color : '9CA3AF',
+            ];
+        })
+        ->filter()
+        ->unique('slug')
+        ->values();
+
+    if ($technologyLogos->count() < 10) {
+        $technologyLogos = $technologyLogos
+            ->concat($defaultTechnologyLogos)
+            ->unique('slug')
+            ->values();
+    }
+
+    $technologyLogos = $technologyLogos->take(18)->values();
+
+    $technologyLogosLoop = collect();
+
+    if ($technologyLogos->isNotEmpty()) {
+        while ($technologyLogosLoop->count() < 14) {
+            $technologyLogosLoop = $technologyLogosLoop->concat($technologyLogos);
+        }
+
+        $technologyLogosLoop = $technologyLogosLoop->take(14)->values();
+    }
+
     $normalizeSkillKey = static fn (string $value): string => strtolower(preg_replace('/[^a-z0-9]+/', '', $value));
 
     $categoryIconMap = [
@@ -100,48 +158,6 @@
         return 'layers-3';
     };
 
-    $skillBrandIcons = [
-        'react' => ['slug' => 'react', 'color' => '61DAFB'],
-        'nextjs' => ['slug' => 'nextdotjs', 'color' => 'FFFFFF'],
-        'nextdotjs' => ['slug' => 'nextdotjs', 'color' => 'FFFFFF'],
-        'vue' => ['slug' => 'vuedotjs', 'color' => '4FC08D'],
-        'nuxt' => ['slug' => 'nuxtdotjs', 'color' => '00DC82'],
-        'laravel' => ['slug' => 'laravel', 'color' => 'FF2D20'],
-        'livewire' => ['slug' => 'livewire', 'color' => 'FB70A9'],
-        'php' => ['slug' => 'php', 'color' => '777BB4'],
-        'nodejs' => ['slug' => 'nodedotjs', 'color' => '339933'],
-        'express' => ['slug' => 'express', 'color' => 'FFFFFF'],
-        'javascript' => ['slug' => 'javascript', 'color' => 'F7DF1E'],
-        'typescript' => ['slug' => 'typescript', 'color' => '3178C6'],
-        'tailwindcss' => ['slug' => 'tailwindcss', 'color' => '06B6D4'],
-        'mysql' => ['slug' => 'mysql', 'color' => '4479A1'],
-        'postgresql' => ['slug' => 'postgresql', 'color' => '4169E1'],
-        'mongodb' => ['slug' => 'mongodb', 'color' => '47A248'],
-        'redis' => ['slug' => 'redis', 'color' => 'DC382D'],
-        'docker' => ['slug' => 'docker', 'color' => '2496ED'],
-        'kubernetes' => ['slug' => 'kubernetes', 'color' => '326CE5'],
-        'git' => ['slug' => 'git', 'color' => 'F05032'],
-        'github' => ['slug' => 'github', 'color' => 'FFFFFF'],
-        'linux' => ['slug' => 'linux', 'color' => 'FCC624'],
-        'nginx' => ['slug' => 'nginx', 'color' => '009639'],
-        'aws' => ['slug' => 'amazonwebservices', 'color' => 'FF9900'],
-        'figma' => ['slug' => 'figma', 'color' => 'F24E1E'],
-    ];
-
-    $resolveSkillIcon = static function (string $skillName) use ($skillBrandIcons, $normalizeSkillKey): ?array {
-        $normalized = $normalizeSkillKey($skillName);
-
-        foreach ($skillBrandIcons as $key => $icon) {
-            if ($normalized === $key || str_contains($normalized, $key)) {
-                return $icon;
-            }
-        }
-
-        return null;
-    };
-
-    $projectCategories = $projects->pluck('category')->unique()->values();
-
     $contactLinks = [
         ['label' => 'Email', 'value' => $contactInfo['email'] ?? '-', 'href' => isset($contactInfo['email']) ? 'mailto:'.$contactInfo['email'] : '#', 'icon' => 'mail'],
         ['label' => 'WhatsApp', 'value' => $contactInfo['whatsapp'] ?? '-', 'href' => isset($contactInfo['whatsapp']) ? 'https://wa.me/'.preg_replace('/\D+/', '', $contactInfo['whatsapp']) : '#', 'icon' => 'message-circle'],
@@ -155,7 +171,7 @@
     $footerSocials = $footer['socials'] ?? [];
 @endphp
 
-    <div class="relative z-10">
+    <div class="relative z-10 overflow-x-hidden">
 
         <x-partials.public-navbar
             :logoText="$logoText"
@@ -195,18 +211,18 @@
 
         <section id="about" class="px-4 py-20 sm:px-8">
             <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr,1.2fr] lg:items-center">
-                <div data-aos="fade-up" data-aos-duration="800">
+                <div data-aos="fade-up" data-aos-duration="800" class="min-w-0">
                     <div class="portfolio-glass relative overflow-hidden rounded-4xl border border-white/10 p-4 shadow-2xl">
                         <img loading="lazy" src="{{ $aboutImage }}" alt="Professional portrait" class="h-108 w-full rounded-3xl object-cover">
                     </div>
                 </div>
 
-                <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="90">
+                <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="90" class="min-w-0">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">About Me</p>
                     <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $aboutTitle }}</h2>
                     <div class="prose prose-invert mt-6 max-w-none text-base-content/75">{!! $aboutDescription !!}</div>
 
-                    <div class="mt-8 grid gap-4 sm:grid-cols-3">
+                    <div class="relative z-10 mt-8 grid gap-4 sm:grid-cols-3">
                         @foreach ($aboutStats as $stat)
                             <article class="portfolio-glass rounded-2xl border border-white/10 p-4 text-center">
                                 <p class="text-2xl font-semibold text-base-content">{{ $stat['value'] ?? '-' }}</p>
@@ -214,6 +230,37 @@
                             </article>
                         @endforeach
                     </div>
+
+                    @if ($technologyLogosLoop->isNotEmpty())
+                        <div class="relative z-0 mx-auto mt-8 w-full min-w-0 max-w-full space-y-3 px-1 text-center sm:max-w-2xl sm:px-0">
+                            <p class="text-xs uppercase tracking-[0.2em] text-base-content/55">Technologies I use</p>
+
+                            <div class="relative">
+                                <span aria-hidden="true" class="pointer-events-none absolute inset-y-0 inset-x-4 rounded-full bg-info/15 opacity-20 blur-xl sm:inset-x-12"></span>
+
+                                <div class="tech-logo-marquee isolate w-full min-w-0 max-w-full overflow-hidden [--tech-fade-size:2rem] [--tech-gap:0.5rem] [--tech-icon-size:1.05rem] [--tech-item-size:2.25rem] [--tech-pad-x:0.6rem] [--tech-pad-y:0.5rem] [--tech-speed:32s] sm:[--tech-fade-size:3.6rem] sm:[--tech-gap:0.66rem] sm:[--tech-icon-size:1.28rem] sm:[--tech-item-size:2.7rem] sm:[--tech-pad-x:1rem] sm:[--tech-pad-y:0.62rem] sm:[--tech-speed:28s]">
+                                    <div class="tech-logo-track">
+                                        @for ($i = 0; $i < 2; $i++)
+                                            @foreach ($technologyLogosLoop as $logo)
+                                                <span class="tech-logo-item group" style="--tech-glow: #{{ $logo['color'] }};" data-tech="{{ $logo['name'] }}" title="{{ $logo['name'] }}">
+                                                    <span aria-hidden="true" class="tech-logo-item-glow"></span>
+                                                    <img
+                                                        src="{{ $simpleIconsCdn }}/{{ $logo['slug'] }}/{{ $logo['color'] }}"
+                                                        alt="{{ $logo['name'] }}"
+                                                        class="tech-logo-icon"
+                                                        loading="lazy"
+                                                    >
+                                                </span>
+                                            @endforeach
+                                        @endfor
+                                    </div>
+
+                                    <span aria-hidden="true" class="tech-logo-fade tech-logo-fade-left"></span>
+                                    <span aria-hidden="true" class="tech-logo-fade tech-logo-fade-right"></span>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
@@ -243,18 +290,27 @@
                                 @foreach ($groupSkills as $skill)
                                     @php
                                         $skillLevel = max(0, min(100, (int) $skill->level));
-                                        $icon = $resolveSkillIcon((string) $skill->name);
+                                        $skillIcon = trim((string) ($skill->icon ?? ''));
+                                        $skillIconParts = str_starts_with($skillIcon, 'si:') ? explode(':', $skillIcon, 3) : [];
+                                        $skillBrandSlug = $skillIconParts[1] ?? '';
+                                        $skillBrandColor = strtoupper($skillIconParts[2] ?? '000000');
                                     @endphp
                                     <div class="skill-item rounded-xl border border-white/10 bg-base-100/35 px-4 py-3 transition duration-300 hover:translate-x-1 hover:border-info/35 hover:bg-base-100/55" title="{{ $skill->name }} - {{ $skillLevel }}%">
                                         <div class="flex items-center justify-between gap-3">
                                             <div class="flex min-w-0 items-center gap-3">
-                                                @if ($icon)
-                                                    <img
-                                                        loading="lazy"
-                                                        src="https://cdn.simpleicons.org/{{ $icon['slug'] }}/{{ $icon['color'] }}"
-                                                        alt="{{ $skill->name }} logo"
-                                                        class="skill-tech-icon h-6 w-6 shrink-0"
-                                                    >
+                                                @if ($skillIcon !== '')
+                                                    <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-info/30 bg-info/12 text-info">
+                                                        @if ($skillBrandSlug !== '')
+                                                            <img
+                                                                src="{{ $simpleIconsCdn }}/{{ $skillBrandSlug }}/{{ $skillBrandColor }}"
+                                                                alt="{{ $skillBrandSlug }}"
+                                                                class="h-3.5 w-3.5"
+                                                                loading="lazy"
+                                                            >
+                                                        @else
+                                                            <i data-lucide="{{ $skillIcon }}" class="h-3.5 w-3.5"></i>
+                                                        @endif
+                                                    </span>
                                                 @else
                                                     <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-base-content/70">
                                                         <i data-lucide="code-2" class="h-3.5 w-3.5"></i>
@@ -291,14 +347,14 @@
 
                 <div class="mb-8 flex flex-wrap justify-center gap-2" data-aos="fade-up" data-aos-duration="800" data-aos-delay="80">
                     <button class="project-filter is-active btn btn-sm rounded-xl border-white/15 bg-base-100/70 text-base-content" data-filter="all">All</button>
-                    @foreach ($projectCategories as $category)
-                        <button class="project-filter btn btn-sm rounded-xl border-white/15 bg-base-100/70 text-base-content" data-filter="{{ $category }}">{{ ucfirst(str_replace('-', ' ', $category)) }}</button>
+                    @foreach ($projectCategoryFilters as $category)
+                        <button class="project-filter btn btn-sm rounded-xl border-white/15 bg-base-100/70 text-base-content" data-filter="{{ $category['value'] }}">{{ $category['label'] }}</button>
                     @endforeach
                 </div>
 
                 <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3" id="project-grid">
                     @foreach ($projects as $project)
-                        <article data-aos="fade-up" data-aos-duration="800" data-category="{{ $project->category }}" class="project-card skill-category-card card overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-info/20">
+                        <article data-aos="fade-up" data-aos-duration="800" data-category="{{ $project->portfolioCategory?->slug ?? $project->category }}" class="project-card skill-category-card card overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-info/20">
                             <span aria-hidden="true" class="skill-card-spotlight"></span>
                             <figure class="relative h-48 overflow-hidden">
                                 <img loading="lazy" src="{{ $resolveAsset($project->image_path, 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80') }}" alt="{{ $project->title }} preview" class="h-full w-full object-cover transition duration-700 hover:scale-110">
@@ -628,7 +684,7 @@
         </div>
         </footer>
 
-        <button id="back-to-top" class="btn btn-info btn-circle fixed bottom-5 right-5 z-50 translate-y-6 opacity-0 shadow-xl transition-all duration-300" aria-label="Back to top">
+        <button id="back-to-top" class="btn btn-info btn-circle fixed bottom-[calc(env(safe-area-inset-bottom)+2rem)] right-5 z-50 translate-y-6 opacity-0 shadow-xl transition-all duration-300" aria-label="Back to top">
             <i data-lucide="arrow-up" class="h-4 w-4"></i>
         </button>
 
