@@ -129,7 +129,15 @@ html[data-theme='light'] .premium-bg-root.premium-bg-admin {
         linear-gradient(90deg, var(--portfolio-grid-color) 1px, transparent 1px);
     background-size: var(--portfolio-grid-size) var(--portfolio-grid-size);
     mask-image: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.95) 30%, rgba(0, 0, 0, 0.45) 75%, transparent 100%);
-    -webkit-mask-image: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.95) 30%, rgba(0, 0, 0, 0.45) 75%, transparent 100%);
+}
+
+.portfolio-background,
+.premium-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    contain: paint;
 }
 
 .portfolio-background::before,
@@ -138,12 +146,14 @@ html[data-theme='light'] .premium-bg-root.premium-bg-admin {
 .premium-background::after {
     content: '';
     position: absolute;
+    top: -6%;
     bottom: -6%;
     width: clamp(7rem, 14vw, 15rem);
     pointer-events: none;
     z-index: 0;
     filter: blur(18px);
-    opacity: 0.56;
+    opacity: 0.65;
+    will-change: transform;
 }
 
 .portfolio-background::before,
@@ -166,6 +176,7 @@ html[data-theme='light'] .premium-bg-root.premium-bg-admin {
     z-index: 0;
     width: clamp(18rem, 34vw, 34rem);
     height: clamp(18rem, 34vw, 34rem);
+    border-radius: 58% 42% 47% 53% / 46% 40% 60% 54%;
     opacity: var(--portfolio-glow-opacity);
     filter: blur(110px);
     will-change: transform;
@@ -971,18 +982,13 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
 
 .tech-logo-marquee {
     position: relative;
-    width: 100%;
-    max-width: 100%;
+    width: min(100%, 34rem);
     margin-inline: auto;
     overflow: hidden;
-    box-sizing: border-box;
-    border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 16px 45px rgba(2, 6, 23, 0.32);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: var(--tech-pad-y, 0.62rem) var(--tech-pad-x, 1rem);
+    border-radius: 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.36), rgba(30, 41, 59, 0.2));
+    padding: 0.62rem;
     mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
 }
@@ -991,105 +997,57 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
     display: flex;
     width: max-content;
     align-items: center;
-    gap: var(--tech-gap, 0.66rem);
+    gap: 0.68rem;
     will-change: transform;
     transform: translate3d(0, 0, 0);
-    animation: tech-logo-marquee var(--tech-speed, 28s) linear infinite;
+    animation: tech-logo-marquee 36s linear infinite;
 }
 
 .tech-logo-item {
-    position: relative;
     display: inline-flex;
-    height: var(--tech-item-size, 2.7rem);
-    width: var(--tech-item-size, 2.7rem);
-    flex: 0 0 auto;
+    height: 2.65rem;
+    width: 2.65rem;
     align-items: center;
     justify-content: center;
-    border-radius: 0.8rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(0);
-    isolation: isolate;
-    transition: transform 0.26s ease, border-color 0.26s ease, box-shadow 0.26s ease, background-color 0.26s ease;
-}
-
-.tech-logo-item-glow {
-    pointer-events: none;
-    position: absolute;
-    inset: 0.35rem;
-    z-index: 0;
-    border-radius: 0.65rem;
-    background: var(--tech-glow, #38bdf8);
-    opacity: 0.14;
-    filter: blur(14px);
-    transition: opacity 0.32s ease;
-}
-
-.tech-logo-item::after {
-    content: attr(data-tech);
-    position: absolute;
-    left: 50%;
-    bottom: calc(100% + 0.45rem);
-    transform: translate(-50%, 4px);
-    border-radius: 0.5rem;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    background: rgba(15, 23, 42, 0.92);
-    padding: 0.22rem 0.45rem;
-    color: rgba(226, 232, 240, 0.92);
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    white-space: nowrap;
-    display: none;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    border-radius: 0.82rem;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background: rgba(15, 23, 42, 0.34);
+    transition: border-color 0.28s ease, background-color 0.28s ease;
 }
 
 .tech-logo-icon {
-    position: relative;
-    z-index: 1;
-    height: var(--tech-icon-size, 1.28rem);
-    width: var(--tech-icon-size, 1.28rem);
-    opacity: 0.64;
-    filter: grayscale(1) saturate(0.15);
-    transition: filter 0.26s ease, opacity 0.26s ease, transform 0.26s ease;
+    height: 1.36rem;
+    width: 1.36rem;
+    opacity: 0.55;
+    filter: grayscale(1);
+    transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
 }
 
 .tech-logo-item:hover {
-    transform: translateY(-4px);
-    border-color: rgba(125, 211, 252, 0.42);
-    background: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 12px 24px rgba(56, 189, 248, 0.22);
-}
-
-.tech-logo-item:hover .tech-logo-item-glow {
-    opacity: 0.22;
+    border-color: rgba(125, 211, 252, 0.45);
+    background: rgba(30, 41, 59, 0.52);
 }
 
 .tech-logo-item:hover .tech-logo-icon {
     opacity: 1;
-    filter: grayscale(0) saturate(1);
+    filter: grayscale(0);
     transform: scale(1.12);
 }
 
-.tech-logo-fade {
-    pointer-events: none;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: var(--tech-fade-size, 3.6rem);
-    z-index: 3;
-}
+@media (max-width: 640px) {
+    .tech-logo-marquee {
+        width: 100%;
+    }
 
-.tech-logo-fade-left {
-    left: 0;
-    background: linear-gradient(to right, rgba(15, 23, 42, 0.85), transparent);
-}
+    .tech-logo-item {
+        height: 2.35rem;
+        width: 2.35rem;
+    }
 
-.tech-logo-fade-right {
-    right: 0;
-    background: linear-gradient(to left, rgba(15, 23, 42, 0.85), transparent);
+    .tech-logo-icon {
+        height: 1.18rem;
+        width: 1.18rem;
+    }
 }
 
 @keyframes tech-logo-marquee {
@@ -1104,8 +1062,7 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
 
 html[data-theme='light'] .tech-logo-marquee {
     border-color: rgba(148, 163, 184, 0.25);
-    background: rgba(248, 250, 252, 0.7);
-    box-shadow: 0 14px 32px rgba(15, 23, 42, 0.12);
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.72), rgba(241, 245, 249, 0.62));
 }
 
 html[data-theme='light'] .tech-logo-item {
@@ -1113,27 +1070,9 @@ html[data-theme='light'] .tech-logo-item {
     background: rgba(255, 255, 255, 0.78);
 }
 
-html[data-theme='light'] .tech-logo-item-glow {
-    opacity: 0.12;
-}
-
-html[data-theme='light'] .tech-logo-item::after {
-    border-color: rgba(148, 163, 184, 0.26);
-    background: rgba(255, 255, 255, 0.98);
-    color: rgba(15, 23, 42, 0.9);
-}
-
 html[data-theme='light'] .tech-logo-item:hover {
     border-color: rgba(2, 132, 199, 0.45);
     background: rgba(240, 249, 255, 0.95);
-}
-
-html[data-theme='light'] .tech-logo-fade-left {
-    background: linear-gradient(to right, rgba(248, 250, 252, 0.96), transparent);
-}
-
-html[data-theme='light'] .tech-logo-fade-right {
-    background: linear-gradient(to left, rgba(248, 250, 252, 0.96), transparent);
 }
 
 .error-fade-in {
