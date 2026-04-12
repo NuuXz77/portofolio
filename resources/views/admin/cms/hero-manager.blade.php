@@ -17,7 +17,35 @@
 
         <x-ui.input-field label="Secondary CTA Link" name="secondaryCtaLink" wire:model.defer="secondaryCtaLink" required />
 
-        <x-ui.file-field label="Hero Image" name="heroImage" wire:model="heroImage" accept="image/*" wrapperClass="lg:col-span-2">
+        <x-ui.file-field
+            label="Secondary CTA File (CV)"
+            name="secondaryCtaFile"
+            wire:model="secondaryCtaFile"
+            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            wrapperClass="lg:col-span-2"
+            hint="Opsional. Jika diisi, tombol secondary di landing otomatis mengarah ke file ini (maks 10MB)."
+        />
+
+        @if ($existingSecondaryCtaFile)
+            <div class="lg:col-span-2 rounded-xl border border-base-content/10 bg-base-100/50 p-3">
+                <p class="text-xs text-base-content/60">Current file</p>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    <a
+                        href="{{ str_starts_with($existingSecondaryCtaFile, 'http') ? $existingSecondaryCtaFile : Storage::url($existingSecondaryCtaFile) }}"
+                        target="_blank"
+                        rel="noreferrer"
+                        class="btn btn-sm btn-outline rounded-xl"
+                    >
+                        Preview File
+                    </a>
+                    <button type="button" wire:click="clearSecondaryCtaFile" class="btn btn-sm btn-ghost rounded-xl text-error">
+                        Remove File
+                    </button>
+                </div>
+            </div>
+        @endif
+
+        <x-ui.file-field label="Hero Image" name="heroImage" wire:model="heroImage" accept="image/*" wrapperClass="lg:col-span-2" hint="Maksimal ukuran file 10MB agar kualitas tetap bagus.">
             @if ($existingImage)
                 <img src="{{ str_starts_with($existingImage, 'http') ? $existingImage : Storage::url($existingImage) }}" alt="Hero preview" class="mt-3 h-52 w-full rounded-xl object-cover">
             @endif

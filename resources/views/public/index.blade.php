@@ -40,6 +40,18 @@
     $navItems[] = ['href' => $journalHref, 'label' => 'Journal'];
 
     $logoText = $navbar['logo_text'] ?? 'Wisnu.dev';
+    $rawBrandMode = (string) ($navbar['brand_mode'] ?? 'text');
+    $rawBrandLogoType = (string) ($navbar['brand_logo_type'] ?? 'image');
+
+    $brandMode = in_array($rawBrandMode, ['text', 'logo', 'combo'], true)
+        ? $rawBrandMode
+        : 'text';
+
+    $brandLogoType = in_array($rawBrandLogoType, ['image', 'icon'], true)
+        ? $rawBrandLogoType
+        : 'image';
+    $brandLogoImage = isset($navbar['brand_logo_image']) ? trim((string) $navbar['brand_logo_image']) : null;
+    $brandLogoIcon = trim((string) ($navbar['brand_logo_icon'] ?? 'sparkles'));
     $ctaText = $navbar['cta_text'] ?? 'Hire Me';
     $ctaLink = $navbar['cta_link'] ?? '#contact';
 
@@ -70,6 +82,14 @@
     $heroPrimaryLink = $hero['primary_cta_link'] ?? '#projects';
     $heroSecondaryText = $hero['secondary_cta_text'] ?? 'Download CV';
     $heroSecondaryLink = $hero['secondary_cta_link'] ?? '#';
+    $heroSecondaryFileRaw = trim((string) ($hero['secondary_cta_file'] ?? ''));
+    $heroSecondaryFileUrl = $heroSecondaryFileRaw !== '' ? $resolveAsset($heroSecondaryFileRaw, '') : '';
+    $heroSecondaryIsDownload = $heroSecondaryFileUrl !== '';
+
+    if ($heroSecondaryIsDownload) {
+        $heroSecondaryLink = $heroSecondaryFileUrl;
+    }
+
     $heroImage = $resolveAsset($hero['image'] ?? null, 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80');
 
     $aboutTitle = $about['title'] ?? 'About Me';
@@ -175,6 +195,10 @@
 
         <x-partials.public-navbar
             :logoText="$logoText"
+            :brandMode="$brandMode"
+            :brandLogoType="$brandLogoType"
+            :brandLogoImage="$brandLogoImage"
+            :brandLogoIcon="$brandLogoIcon"
             brandHref="#home"
             :navItems="$navItems"
             :ctaText="$ctaText"
@@ -196,14 +220,16 @@
 
                     <div class="mt-8 flex flex-wrap gap-3">
                         <a href="{{ $heroPrimaryLink }}" class="btn btn-info rounded-xl px-6">{{ $heroPrimaryText }}</a>
-                        <a href="{{ $heroSecondaryLink }}" class="btn btn-outline rounded-xl px-6">{{ $heroSecondaryText }}</a>
+                        <a href="{{ $heroSecondaryLink }}" @if ($heroSecondaryIsDownload) download @endif class="btn btn-outline rounded-xl px-6">{{ $heroSecondaryText }}</a>
                     </div>
                 </div>
 
                 <div class="relative" data-aos="fade-left" data-aos-duration="900" data-aos-delay="130">
-                    <div class="portfolio-glass relative overflow-hidden rounded-4xl border border-white/10 p-4 shadow-2xl">
-                        <img loading="eager" src="{{ $heroImage }}" alt="Developer workspace" class="h-96 w-full rounded-3xl object-cover sm:h-120">
-                        <div class="absolute inset-0 rounded-3xl bg-linear-to-tr from-base-300/40 via-transparent to-info/20"></div>
+                    <div class="hero-premium-frame rounded-4xl">
+                        <div class="hero-premium-card portfolio-glass relative m-px overflow-hidden border border-white/10 p-4 shadow-2xl">
+                            <img loading="eager" src="{{ $heroImage }}" alt="Developer workspace" class="h-96 w-full rounded-3xl object-cover sm:h-120">
+                            <div class="absolute inset-0 rounded-3xl bg-linear-to-tr from-base-300/40 via-transparent to-info/20"></div>
+                        </div>
                     </div>
                 </div>
             </div>

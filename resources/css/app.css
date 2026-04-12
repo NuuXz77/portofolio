@@ -351,6 +351,90 @@ html[data-theme='light'] .premium-bg-root.premium-bg-admin {
     @apply border-base-content/20 bg-base-100/70 backdrop-blur-md;
 }
 
+.hero-premium-frame {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.hero-premium-frame::before {
+    content: '';
+    position: absolute;
+    inset: -140%;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        rgba(56, 189, 248, 0.45) 48deg,
+        transparent 116deg,
+        rgba(99, 102, 241, 0.26) 186deg,
+        transparent 264deg,
+        rgba(34, 211, 238, 0.38) 360deg
+    );
+    animation: hero-border-orbit 12s linear infinite;
+}
+
+.hero-premium-frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.34;
+    box-shadow: 0 0 26px -16px rgba(56, 189, 248, 0.5);
+}
+
+.hero-premium-card {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: calc(2rem - 1px);
+    background-clip: padding-box;
+}
+
+.hero-premium-card::before,
+.hero-premium-card::after {
+    display: none;
+}
+
+@keyframes hero-border-orbit {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes hero-border-glow-drift {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.2;
+    }
+
+    50% {
+        transform: translate3d(0.8rem, -0.7rem, 0) scale(1.06);
+        opacity: 0.28;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-premium-frame::before {
+        opacity: 0.48;
+        animation-duration: 14s;
+    }
+
+    .hero-premium-frame::after {
+        opacity: 0.22;
+    }
+}
+
 .premium-bg-root .sidebar-link,
 .premium-bg-root .btn.btn-ghost,
 #portfolio .btn.btn-ghost {

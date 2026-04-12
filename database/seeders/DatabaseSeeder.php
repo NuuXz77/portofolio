@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\MenuItem;
+use App\Models\PortfolioCategory;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\SiteSetting;
@@ -144,17 +145,103 @@ class DatabaseSeeder extends Seeder
             );
         }
 
+        $projectCategories = [
+            ['name' => 'HR & Attendance Systems', 'slug' => 'hr-attendance', 'description' => 'Attendance, employee management, and leave workflows.', 'sort_order' => 1],
+            ['name' => 'Education Management Systems', 'slug' => 'education-management', 'description' => 'School discipline and student information systems.', 'sort_order' => 2],
+            ['name' => 'Production & POS Systems', 'slug' => 'production-pos', 'description' => 'Production, inventory, and cashier operations.', 'sort_order' => 3],
+            ['name' => 'Company Profile Websites', 'slug' => 'company-profile', 'description' => 'Corporate websites and content management.', 'sort_order' => 4],
+            ['name' => 'Rental & Booking Platforms', 'slug' => 'rental-booking', 'description' => 'Rental transactions, booking, and payment workflows.', 'sort_order' => 5],
+        ];
+
+        $projectCategoryMap = [];
+
+        foreach ($projectCategories as $category) {
+            $model = PortfolioCategory::query()->updateOrCreate(
+                ['type' => 'project', 'slug' => $category['slug']],
+                [
+                    'name' => $category['name'],
+                    'description' => $category['description'],
+                    'sort_order' => $category['sort_order'],
+                    'is_visible' => true,
+                ]
+            );
+
+            $projectCategoryMap[$category['slug']] = $model;
+        }
+
         foreach ([
-            ['title' => 'Inventory Hub Pro', 'category' => 'web-app', 'description' => 'Enterprise inventory management with real-time stock tracking and role-based access.', 'tech_stack' => ['Laravel', 'Livewire', 'MySQL', 'Redis'], 'demo_link' => '#', 'github_link' => '#', 'is_featured' => true, 'sort_order' => 1],
-            ['title' => 'Payment API Gateway', 'category' => 'api', 'description' => 'Secure API gateway handling payment orchestration and webhook pipelines.', 'tech_stack' => ['Laravel', 'JWT', 'PostgreSQL'], 'demo_link' => '#', 'github_link' => '#', 'is_featured' => true, 'sort_order' => 2],
-            ['title' => 'Ops Monitoring Dashboard', 'category' => 'dashboard', 'description' => 'Observability dashboard for logs, alerts, and deployment health metrics.', 'tech_stack' => ['Next.js', 'Node.js', 'Prometheus'], 'demo_link' => '#', 'github_link' => '#', 'is_featured' => false, 'sort_order' => 3],
+            [
+                'title' => 'Kusen (Kudu Absen)',
+                'category_slug' => 'hr-attendance',
+                'description' => 'Digital attendance platform with face recognition, location validation, leave request workflow, and structured employee management by department and position.',
+                'tech_stack' => ['Laravel', 'Tailwind CSS', 'Livewire', 'DaisyUI', 'PHP 8.2'],
+                'demo_link' => '#',
+                'github_link' => '#',
+                'is_featured' => true,
+                'sort_order' => 1,
+                'image_path' => 'https://picsum.photos/seed/kusen-pplg/1200/800',
+            ],
+            [
+                'title' => 'Siska (Sistem Informasi Ketertiban Siswa)',
+                'category_slug' => 'education-management',
+                'description' => 'School discipline management system with multi-role access, violation logging via barcode/manual input, class scoring, and export-ready reports.',
+                'tech_stack' => ['Laravel', 'Tailwind CSS', 'Livewire', 'DaisyUI', 'PHP 8.2'],
+                'demo_link' => '#',
+                'github_link' => '#',
+                'is_featured' => true,
+                'sort_order' => 2,
+                'image_path' => 'https://picsum.photos/seed/siska-pplg/1200/800',
+            ],
+            [
+                'title' => 'Rosemary',
+                'category_slug' => 'production-pos',
+                'description' => 'Integrated platform for production planning, inventory movement, POS cashier transactions, purchases, and waste tracking with role-based controls.',
+                'tech_stack' => ['Laravel 12', 'Livewire 3', 'Tailwind CSS 4', 'DaisyUI 5', 'MySQL', 'ApexCharts', 'Spatie Permission'],
+                'demo_link' => '#',
+                'github_link' => '#',
+                'is_featured' => true,
+                'sort_order' => 3,
+                'image_path' => 'https://picsum.photos/seed/rosemary-pplg/1200/800',
+            ],
+            [
+                'title' => 'Compro TMS',
+                'category_slug' => 'company-profile',
+                'description' => 'Dynamic company profile website with centralized CMS, chatbot support, vacancy publication, and admin analytics dashboard for content operations.',
+                'tech_stack' => ['Laravel 10', 'Tailwind CSS', 'Vite', 'AdminLTE 3', 'Chart.js', 'MySQL'],
+                'demo_link' => '#',
+                'github_link' => '#',
+                'is_featured' => false,
+                'sort_order' => 4,
+                'image_path' => 'https://picsum.photos/seed/compro-tms/1200/800',
+            ],
+            [
+                'title' => 'Sewa Motor (UJIKOM)',
+                'category_slug' => 'rental-booking',
+                'description' => 'Motorbike rental web app with booking flow, payment processing, return management, role-based dashboards, and revenue sharing reports.',
+                'tech_stack' => ['Laravel 12', 'Livewire 3', 'Volt', 'Tailwind CSS 4', 'DaisyUI 5', 'Mary UI', 'MySQL'],
+                'demo_link' => '#',
+                'github_link' => '#',
+                'is_featured' => true,
+                'sort_order' => 5,
+                'image_path' => 'https://picsum.photos/seed/sewa-motor-ujikom/1200/800',
+            ],
         ] as $project) {
+            $category = $projectCategoryMap[$project['category_slug']] ?? null;
+
             Project::query()->updateOrCreate(
                 ['title' => $project['title']],
-                $project + [
+                [
                     'slug' => Str::slug($project['title']),
-                    'image_path' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80',
+                    'description' => $project['description'],
+                    'tech_stack' => $project['tech_stack'],
+                    'image_path' => $project['image_path'],
+                    'demo_link' => $project['demo_link'],
+                    'github_link' => $project['github_link'],
+                    'category' => $category?->slug ?? $project['category_slug'],
+                    'category_id' => $category?->id,
+                    'is_featured' => $project['is_featured'],
                     'is_visible' => true,
+                    'sort_order' => $project['sort_order'],
                 ]
             );
         }

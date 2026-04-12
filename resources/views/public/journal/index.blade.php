@@ -12,6 +12,14 @@
     };
 
     $logoText = (string) ($logoText ?? 'Wisnu.dev');
+    $brandMode = in_array(($brandMode ?? 'text'), ['text', 'logo', 'combo'], true)
+        ? (string) $brandMode
+        : 'text';
+    $brandLogoType = in_array(($brandLogoType ?? 'image'), ['image', 'icon'], true)
+        ? (string) $brandLogoType
+        : 'image';
+    $brandLogoImage = isset($brandLogoImage) ? trim((string) $brandLogoImage) : null;
+    $brandLogoIcon = trim((string) ($brandLogoIcon ?? 'sparkles'));
     $navItems = is_array($navItems ?? null) ? $navItems : [];
     $ctaText = (string) ($ctaText ?? 'Hire Me');
     $ctaLink = (string) ($ctaLink ?? route('home').'#contact');
@@ -20,6 +28,10 @@
 <div>
     <x-partials.public-navbar
         :logoText="$logoText"
+        :brandMode="$brandMode"
+        :brandLogoType="$brandLogoType"
+        :brandLogoImage="$brandLogoImage"
+        :brandLogoIcon="$brandLogoIcon"
         :brandHref="route('home')"
         :navItems="$navItems"
         :ctaText="$ctaText"

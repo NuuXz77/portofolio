@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Cms;
 
+use Illuminate\Support\Str;
 use App\Support\AdminActivity;
 use App\Support\PortfolioContent;
 use Livewire\Attributes\Layout;
@@ -29,7 +30,11 @@ class HeroManager extends Component
 
     public ?string $existingImage = null;
 
+    public ?string $existingSecondaryCtaFile = null;
+
     public $heroImage;
+
+    public $secondaryCtaFile;
 
     #[Layout('components.layouts.admin')]
     #[Title('Hero Section')]
@@ -45,6 +50,7 @@ class HeroManager extends Component
         $this->secondaryCtaText = $hero['secondary_cta_text'] ?? '';
         $this->secondaryCtaLink = $hero['secondary_cta_link'] ?? '#';
         $this->existingImage = $hero['image'] ?? null;
+        $this->existingSecondaryCtaFile = $hero['secondary_cta_file'] ?? null;
     }
 
     public function save(): void
@@ -57,13 +63,27 @@ class HeroManager extends Component
             'primaryCtaLink' => ['required', 'string', 'max:255'],
             'secondaryCtaText' => ['required', 'string', 'max:80'],
             'secondaryCtaLink' => ['required', 'string', 'max:255'],
-            'heroImage' => ['nullable', 'image', 'max:2048'],
+            'heroImage' => ['nullable', 'image', 'max:10240'],
+            'secondaryCtaFile' => ['nullable', 'file', 'max:10240', 'mimes:pdf,doc,docx'],
         ]);
 
         $image = $this->existingImage;
+        $secondaryCtaFilePath = $this->existingSecondaryCtaFile;
 
         if ($this->heroImage) {
-            $image = $this->heroImage->store('portfolio/hero', 'public');
+            $image = $this->heroImage->storeAs(
+                'portfolio/hero',
+                $this->buildUploadFilename($this->heroImage, 'hero-image'),
+                'public'
+            );
+        }
+
+        if ($this->secondaryCtaFile) {
+            $secondaryCtaFilePath = $this->secondaryCtaFile->storeAs(
+                'portfolio/hero/cv',
+                $this->buildUploadFilename($this->secondaryCtaFile, 'cv-file'),
+                'public'
+            );
         }
 
         $roles = collect(preg_split('/\r\n|\r|\n/', $this->rolesText))
@@ -80,14 +100,44 @@ class HeroManager extends Component
             'primary_cta_link' => $this->primaryCtaLink,
             'secondary_cta_text' => $this->secondaryCtaText,
             'secondary_cta_link' => $this->secondaryCtaLink,
+            'secondary_cta_file' => $secondaryCtaFilePath,
             'image' => $image,
         ]);
 
         $this->existingImage = $image;
+        $this->existingSecondaryCtaFile = $secondaryCtaFilePath;
+        $this->secondaryCtaFile = null;
 
         AdminActivity::log('updated', 'hero', 'Updated hero section settings.');
-    session()->flash('success', 'Hero section updated.');
-    $this->dispatch('app-toast', type: 'success', message: 'Hero section updated.');
+        session()->flash('success', 'Hero section updated.');
+        $this->dispatch('app-toast', type: 'success', message: 'Hero section updated.');
+    }
+
+    public function clearSecondaryCtaFile(): void
+    {
+        $this->existingSecondaryCtaFile = null;
+        $this->secondaryCtaFile = null;
+    }
+
+    private function buildUploadFilename($uploadedFile, string $fallbackBase): string
+    {
+        $originalName = pathinfo((string) $uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+        $baseName = Str::slug($originalName !== '' ? $originalName : $fallbackBase, '-');
+
+        if ($baseName === '') {
+            $baseName = $fallbackBase;
+        }
+
+        $timestamp = now()->format('Y-m-d_H-i-s');
+        $extension = strtolower((string) $uploadedFile->getClientOriginalExtension());
+
+        if ($extension === '') {
+            $extension = strtolower((string) $uploadedFile->extension());
+        }
+
+        return $extension !== ''
+            ? sprintf('%s_%s.%s', $baseName, $timestamp, $extension)
+            : sprintf('%s_%s', $baseName, $timestamp);
     }
 
     public function render()

@@ -1,5 +1,9 @@
 @props([
     'logoText' => 'Wisnu.dev',
+    'brandMode' => 'text',
+    'brandLogoType' => 'image',
+    'brandLogoImage' => null,
+    'brandLogoIcon' => 'sparkles',
     'brandHref' => '/',
     'navItems' => [],
     'ctaText' => 'Hire Me',
@@ -48,12 +52,60 @@
 
         return $currentPath === $targetPath || str_starts_with($currentPath, $targetPath.'/');
     };
+
+    $resolvedLogoText = trim((string) $logoText);
+    $resolvedBrandMode = in_array((string) $brandMode, ['text', 'logo', 'combo'], true) ? (string) $brandMode : 'text';
+    $resolvedBrandLogoType = in_array((string) $brandLogoType, ['image', 'icon'], true) ? (string) $brandLogoType : 'image';
+    $resolvedBrandLogoIcon = trim((string) $brandLogoIcon);
+    $resolvedBrandLogoImage = trim((string) ($brandLogoImage ?? ''));
+
+    $brandImageUrl = '';
+
+    if ($resolvedBrandLogoImage !== '') {
+        $brandImageUrl = $isAbsoluteHttp($resolvedBrandLogoImage)
+            ? $resolvedBrandLogoImage
+            : \Illuminate\Support\Facades\Storage::url($resolvedBrandLogoImage);
+    }
+
+    $showBrandText = in_array($resolvedBrandMode, ['text', 'combo'], true);
+    $showBrandMedia = in_array($resolvedBrandMode, ['logo', 'combo'], true);
+
+    $hasBrandImage = $resolvedBrandLogoType === 'image' && $brandImageUrl !== '';
+    $hasBrandIcon = $resolvedBrandLogoType === 'icon' && $resolvedBrandLogoIcon !== '';
+    $hasBrandMedia = $showBrandMedia && ($hasBrandImage || $hasBrandIcon);
+
+    if (! $showBrandText && ! $hasBrandMedia) {
+        $showBrandText = true;
+    }
+
+    if ($showBrandText && $resolvedLogoText === '') {
+        $resolvedLogoText = 'Wisnu.dev';
+    }
 @endphp
 
-<header id="top" class="sticky top-0 z-50 px-4 pt-4 sm:px-8">
+<header id="top" class="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-8">
     <div class="relative mx-auto max-w-7xl">
         <nav class="portfolio-glass glass-surface flex w-full items-center justify-between rounded-2xl border border-base-content/15 px-4 py-3 shadow-2xl backdrop-blur-xl sm:px-6" aria-label="Primary navigation">
-            <a href="{{ $brandHref }}" @if($shouldNavigate($brandHref)) wire:navigate @endif class="text-xl font-semibold tracking-tight text-base-content">{{ $logoText }}</a>
+            <a
+                href="{{ $brandHref }}"
+                @if($shouldNavigate($brandHref)) wire:navigate @endif
+                class="inline-flex min-w-0 items-center gap-2 text-xl font-semibold tracking-tight text-base-content"
+                aria-label="{{ $resolvedLogoText !== '' ? $resolvedLogoText : 'Brand' }}"
+            >
+                @if ($hasBrandMedia)
+                    @if ($hasBrandImage)
+                        <img src="{{ $brandImageUrl }}" alt="Brand logo" class="h-8 w-8 shrink-0 rounded-lg border border-white/10 object-cover sm:h-9 sm:w-9">
+                    @else
+                        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-info/35 bg-info/15 text-info sm:h-9 sm:w-9">
+                            <i data-lucide="{{ $resolvedBrandLogoIcon }}" class="h-4 w-4 sm:h-5 sm:w-5"></i>
+                        </span>
+                    @endif
+                @endif
+
+                @if ($showBrandText)
+                    <span class="truncate">{{ $resolvedLogoText }}</span>
+                @endif
+            </a>
 
             <div class="hidden items-center gap-2 lg:flex">
                 @foreach ($navItems as $item)
@@ -111,3 +163,5 @@
         </div>
     </div>
 </header>
+
+<div aria-hidden="true" class="h-10 sm:h-20"></div>

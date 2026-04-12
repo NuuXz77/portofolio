@@ -6,10 +6,37 @@ use App\Models\MenuItem;
 
 class PublicNavbarData
 {
+    /**
+     * @return array{logoText: string, brandMode: string, brandLogoType: string, brandLogoImage: ?string, brandLogoIcon: string}
+     */
+    public static function brandConfig(?array $navbar = null): array
+    {
+        $navbar ??= PortfolioContent::get('navbar', []);
+
+        $rawBrandMode = (string) ($navbar['brand_mode'] ?? 'text');
+        $rawBrandLogoType = (string) ($navbar['brand_logo_type'] ?? 'image');
+
+        $brandMode = in_array($rawBrandMode, ['text', 'logo', 'combo'], true)
+            ? $rawBrandMode
+            : 'text';
+
+        $brandLogoType = in_array($rawBrandLogoType, ['image', 'icon'], true)
+            ? $rawBrandLogoType
+            : 'image';
+
+        return [
+            'logoText' => trim((string) ($navbar['logo_text'] ?? 'Wisnu.dev')),
+            'brandMode' => $brandMode,
+            'brandLogoType' => $brandLogoType,
+            'brandLogoImage' => isset($navbar['brand_logo_image']) ? trim((string) $navbar['brand_logo_image']) : null,
+            'brandLogoIcon' => trim((string) ($navbar['brand_logo_icon'] ?? 'sparkles')),
+        ];
+    }
+
     public static function brandName(string $fallback = 'Wisnu.dev'): string
     {
-        $navbar = PortfolioContent::get('navbar', []);
-        $brand = trim((string) ($navbar['logo_text'] ?? ''));
+        $brandConfig = self::brandConfig();
+        $brand = trim($brandConfig['logoText'] ?? '');
 
         return $brand !== '' ? $brand : $fallback;
     }
@@ -17,6 +44,7 @@ class PublicNavbarData
     public static function forJournal(): array
     {
         $navbar = PortfolioContent::get('navbar', []);
+        $brandConfig = self::brandConfig($navbar);
 
         $menuItems = MenuItem::query()
             ->where('is_visible', true)
@@ -87,7 +115,7 @@ class PublicNavbarData
         }
 
         return [
-            'logoText' => self::brandName(),
+            ...$brandConfig,
             'navItems' => $navItems->all(),
             'ctaText' => (string) ($navbar['cta_text'] ?? 'Hire Me'),
             'ctaLink' => $ctaLinkRaw !== '' ? $ctaLinkRaw : $homeUrl,
