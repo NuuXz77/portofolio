@@ -86,7 +86,7 @@ class TestimonialsManager extends Component
             'message' => ['required', 'string', 'max:2000'],
             'sortOrder' => ['required', 'integer', 'min:0'],
             'isVisible' => ['required', 'boolean'],
-            'avatar' => ['nullable', 'image', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'max:10240'],
         ]);
 
         $avatarPath = $this->existingAvatar;

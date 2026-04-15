@@ -68,7 +68,7 @@ class NavbarManager extends Component
             'brandMode' => ['required', 'in:text,logo,combo'],
             'brandLogoType' => ['required', 'in:image,icon'],
             'brandLogoIcon' => ['nullable', 'string', 'max:80'],
-            'brandLogoImage' => ['nullable', 'image', 'max:2048', 'mimes:png,jpg,jpeg,webp,svg'],
+            'brandLogoImage' => ['nullable', 'image', 'max:10240', 'mimes:png,jpg,jpeg,webp,svg'],
             'ctaText' => ['required', 'string', 'max:80'],
             'ctaLink' => ['required', 'string', 'max:255'],
         ]);

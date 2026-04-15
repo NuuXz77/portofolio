@@ -96,7 +96,7 @@ class AboutManager extends Component
             'title' => ['required', 'string', 'max:180'],
             'description' => ['required', 'string', 'max:6000'],
             'statsText' => ['required', 'string', 'max:1200'],
-            'profileImage' => ['nullable', 'image', 'max:2048'],
+            'profileImage' => ['nullable', 'image', 'max:10240'],
         ]);
 
         $image = $this->existingImage;

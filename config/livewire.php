@@ -26,7 +26,8 @@ return [
     |
     */
 
-    'view_path' => resource_path('views/'),
+    'view_path' => resource_path('views/
+    '),
 
     /*
     |---------------------------------------------------------------------------
