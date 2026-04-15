@@ -75,7 +75,7 @@
                 @endif
 
                 <div class="mt-8 rounded-2xl border border-white/10 bg-base-100/60 p-5 shadow-xl">
-                    <div class="prose prose-invert max-w-none leading-relaxed text-base-content/85">
+                    <div class="journal-content prose prose-invert max-w-none leading-relaxed text-base-content/85">
                         {!! $article->content !!}
                     </div>
                 </div>

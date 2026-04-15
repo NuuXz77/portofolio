@@ -206,40 +206,46 @@
         />
 
         <main>
-        <section id="home" class="relative px-4 pb-5 pt-5 sm:px-8 sm:pt-10 lg:pt-14">
-            <div class="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
-                <div data-aos="fade-right" data-aos-duration="900">
-                    <span class="badge badge-outline badge-info mb-5 rounded-full px-4 py-3 text-xs tracking-wide">Fullstack Engineer • Open To Collaboration</span>
-                    <h1 class="text-4xl font-semibold leading-tight text-base-content sm:text-5xl lg:text-6xl">{{ $heroHeadline }}</h1>
-                    <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/75 sm:text-lg">{{ $heroSubheadline }}</p>
+        <section id="home" class="relative px-4 pb-8 pt-4 sm:px-8 sm:pb-5 sm:pt-10 lg:pt-14">
+            <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
+                <div>
+                    <div data-aos="fade-right" data-aos-duration="900">
+                        <span class="badge badge-outline badge-info mb-5 rounded-full px-4 py-3 text-xs tracking-wide">Fullstack Engineer • Open To Collaboration</span>
+                        <h1 class="text-4xl font-semibold leading-tight text-base-content sm:text-5xl lg:text-6xl">{{ $heroHeadline }}</h1>
+                        <p class="mt-5 max-w-2xl text-base leading-relaxed text-base-content/75 sm:text-lg">{{ $heroSubheadline }}</p>
 
-                    <div class="mt-6 flex flex-wrap items-center gap-3">
-                        <span class="text-sm text-base-content/65">Currently working as</span>
-                        <span id="typing-role" data-roles='@json($heroRoles)' class="rounded-full border border-info/40 bg-info/10 px-4 py-1.5 text-sm font-medium text-info"></span>
-                    </div>
+                        <div class="mt-6 flex flex-wrap items-center gap-3">
+                            <span class="text-sm text-base-content/65">Currently working as</span>
+                            <span id="typing-role" data-roles='@json($heroRoles)' class="rounded-full border border-info/40 bg-info/10 px-4 py-1.5 text-sm font-medium text-info"></span>
+                        </div>
 
-                    <div class="mt-8 flex flex-wrap gap-3">
-                        <a href="{{ $heroPrimaryLink }}" class="btn btn-info rounded-xl px-6">{{ $heroPrimaryText }}</a>
-                        <a href="{{ $heroSecondaryLink }}" @if ($heroSecondaryIsDownload) download @endif class="btn btn-outline rounded-xl px-6">{{ $heroSecondaryText }}</a>
+                        <div class="mt-8 flex flex-wrap gap-3">
+                            <a href="{{ $heroPrimaryLink }}" class="btn btn-info rounded-xl px-6">{{ $heroPrimaryText }}</a>
+                            <a href="{{ $heroSecondaryLink }}" @if ($heroSecondaryIsDownload) download @endif class="btn btn-outline rounded-xl px-6">{{ $heroSecondaryText }}</a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="relative" data-aos="fade-left" data-aos-duration="900" data-aos-delay="130">
-                    <div class="hero-premium-frame rounded-4xl">
-                        <div class="hero-premium-card portfolio-glass relative m-px overflow-hidden border border-white/10 p-4 shadow-2xl">
-                            <img loading="eager" src="{{ $heroImage }}" alt="Developer workspace" class="h-96 w-full rounded-3xl object-cover sm:h-120">
-                            <div class="absolute inset-0 rounded-3xl bg-linear-to-tr from-base-300/40 via-transparent to-info/20"></div>
+                <div class="relative">
+                    <div data-aos="fade-left" data-aos-duration="900" data-aos-delay="130">
+                        <div class="hero-premium-frame rounded-4xl">
+                            <div class="hero-premium-card portfolio-glass relative m-px overflow-hidden border border-white/10 p-4 shadow-2xl">
+                                <img loading="eager" src="{{ $heroImage }}" alt="Developer workspace" class="h-96 w-full rounded-3xl object-cover sm:h-120">
+                                <div class="absolute inset-0 rounded-3xl bg-linear-to-tr from-base-300/40 via-transparent to-info/20"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="px-4 py-20 sm:px-8">
+        <section id="about" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1fr,1.2fr] lg:items-center">
-                <div data-aos="fade-up" data-aos-duration="800" class="min-w-0">
-                    <div class="portfolio-glass relative overflow-hidden rounded-4xl border border-white/10 p-4 shadow-2xl">
-                        <img loading="lazy" src="{{ $aboutImage }}" alt="Professional portrait" class="h-108 w-full rounded-3xl object-cover">
+                <div class="min-w-0">
+                    <div data-aos="fade-up" data-aos-duration="800" class="min-w-0">
+                        <div class="portfolio-glass relative overflow-hidden rounded-4xl border border-white/10 p-4 shadow-2xl">
+                            <img loading="lazy" src="{{ $aboutImage }}" alt="Professional portrait" class="h-108 w-full rounded-3xl object-cover">
+                        </div>
                     </div>
                 </div>
 
@@ -291,7 +297,7 @@
             </div>
         </section>
 
-        <section id="skills" class="px-4 py-20 sm:px-8">
+        <section id="skills" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-10 text-center" data-aos="fade-up" data-aos-duration="800">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">SKILLS</p>
@@ -364,7 +370,7 @@
             </div>
         </section>
 
-        <section id="projects" class="px-4 py-20 sm:px-8">
+        <section id="projects" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-8 text-center" data-aos="fade-up" data-aos-duration="800">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">Projects</p>
@@ -405,7 +411,7 @@
             </div>
         </section>
 
-        <section class="px-4 py-20 sm:px-8">
+        <section class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl" data-aos="fade-up" data-aos-duration="800">
                 <div class="mb-8 text-center">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">Featured</p>
@@ -467,7 +473,7 @@
             </div>
         </section>
 
-        <section class="px-4 py-20 sm:px-8">
+        <section class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-8 flex flex-wrap items-center justify-between gap-3" data-aos="fade-up" data-aos-duration="800">
                     <div>
@@ -513,7 +519,7 @@
             </div>
         </section>
 
-        <section id="experience" class="px-4 py-20 sm:px-8">
+        <section id="experience" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-12 text-center" data-aos="fade-up" data-aos-duration="800">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">Experience</p>
@@ -535,7 +541,7 @@
             </div>
         </section>
 
-        <section id="services" class="px-4 py-20 sm:px-8">
+        <section id="services" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-10 text-center" data-aos="fade-up" data-aos-duration="800">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">Services</p>
@@ -559,7 +565,7 @@
             </div>
         </section>
 
-        <section class="px-4 py-20 sm:px-8">
+        <section class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl" data-aos="fade-up" data-aos-duration="800">
                 <div class="mb-8 text-center">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">Testimonials</p>
@@ -622,7 +628,7 @@
             </div>
         </section>
 
-        <section id="contact" class="px-4 pb-24 pt-20 sm:px-8">
+        <section id="contact" class="px-4 pb-16 pt-14 sm:px-8 sm:pb-24 sm:pt-20">
             <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
                 <article data-aos="fade-up" data-aos-duration="800" class="portfolio-glass rounded-4xl border border-white/10 p-6 shadow-2xl sm:p-8">
                     <p class="text-sm uppercase tracking-[0.24em] text-info">Contact</p>

@@ -2,6 +2,7 @@ import './bootstrap';
 
 import AOS from 'aos';
 import ApexCharts from 'apexcharts';
+import Lenis from 'lenis';
 import { createIcons, icons } from 'lucide';
 import Quill from 'quill';
 import Swiper from 'swiper';
@@ -25,6 +26,223 @@ let liveUsersRoot = null;
 let skillProgressObserver = null;
 let appToastLivewireBound = false;
 let dropdownActionsGlobalBound = false;
+let portfolioLenis = null;
+let portfolioLenisRafId = null;
+let portfolioParallaxNodes = [];
+let portfolioParallaxFrameId = null;
+let portfolioParallaxPendingScroll = 0;
+let portfolioParallaxScrollBound = false;
+let portfolioParallaxResizeBound = false;
+
+const LENIS_EASING = (value) => 1 - Math.pow(1 - value, 3);
+
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const getParallaxIntensity = () => {
+	if (window.matchMedia('(max-width: 640px)').matches) {
+		return 0.22;
+	}
+
+	if (window.matchMedia('(max-width: 1024px)').matches) {
+		return 0.34;
+	}
+
+	return 0.52;
+};
+
+const getParallaxLayerSpeed = (layer) => {
+	const normalizedLayer = String(layer || '').trim().toLowerCase();
+
+	switch (normalizedLayer) {
+	case 'background':
+	case 'bg':
+		return 0.2;
+	case 'mid':
+	case 'middle':
+		return 0.4;
+	case 'foreground':
+	case 'fg':
+		return 0.1;
+	default:
+		return 0.15;
+	}
+};
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const destroyPortfolioLenis = () => {
+	if (portfolioLenisRafId) {
+		window.cancelAnimationFrame(portfolioLenisRafId);
+		portfolioLenisRafId = null;
+	}
+
+	if (portfolioLenis) {
+		portfolioLenis.destroy();
+		portfolioLenis = null;
+	}
+};
+
+const clearPortfolioParallax = () => {
+	if (portfolioParallaxFrameId) {
+		window.cancelAnimationFrame(portfolioParallaxFrameId);
+		portfolioParallaxFrameId = null;
+	}
+
+	portfolioParallaxNodes.forEach((node) => {
+		if (!(node.element instanceof HTMLElement)) {
+			return;
+		}
+
+		node.element.style.removeProperty('transform');
+		node.element.style.removeProperty('will-change');
+	});
+
+	portfolioParallaxNodes = [];
+};
+
+const applyPortfolioParallax = (scrollValue) => {
+	if (!portfolioParallaxNodes.length) {
+		return;
+	}
+
+	const intensity = getParallaxIntensity();
+	const scaleMultiplier = intensity;
+	const viewportRange = Math.max(window.innerHeight * 1.35, 1);
+
+	portfolioParallaxNodes.forEach((node) => {
+		if (!(node.element instanceof HTMLElement)) {
+			return;
+		}
+
+		const translated = clamp(scrollValue * node.speed * intensity, -node.maxShift, node.maxShift);
+		const scaleProgress = clamp(scrollValue / viewportRange, 0, 1);
+		const scaleValue = node.scaleFrom + node.scaleDelta * scaleProgress * scaleMultiplier;
+
+		node.element.style.willChange = 'transform';
+		node.element.style.transform = `translate3d(0, ${translated.toFixed(2)}px, 0) scale(${scaleValue.toFixed(4)})`;
+	});
+};
+
+const queuePortfolioParallaxUpdate = (scrollValue) => {
+	portfolioParallaxPendingScroll = Number.isFinite(scrollValue) ? scrollValue : window.scrollY;
+
+	if (portfolioParallaxFrameId) {
+		return;
+	}
+
+	portfolioParallaxFrameId = window.requestAnimationFrame(() => {
+		applyPortfolioParallax(portfolioParallaxPendingScroll);
+		portfolioParallaxFrameId = null;
+	});
+};
+
+const initPortfolioParallax = (pageRoot) => {
+	clearPortfolioParallax();
+
+	if (!(pageRoot instanceof HTMLElement) || prefersReducedMotion()) {
+		return;
+	}
+
+	const elements = pageRoot.querySelectorAll('[data-parallax-layer], [data-parallax-speed], [data-parallax-scale]');
+
+	portfolioParallaxNodes = Array.from(elements)
+		.map((element) => {
+			if (!(element instanceof HTMLElement)) {
+				return null;
+			}
+
+			const speedFromLayer = getParallaxLayerSpeed(element.dataset.parallaxLayer || '');
+			const customSpeed = Number.parseFloat(element.dataset.parallaxSpeed || '');
+			const maxShift = Number.parseFloat(element.dataset.parallaxMax || '140');
+			const scaleTarget = Number.parseFloat(element.dataset.parallaxScale || '1');
+			const scaleFrom = Number.parseFloat(element.dataset.parallaxScaleFrom || '1');
+
+			return {
+				element,
+				speed: Number.isFinite(customSpeed) ? customSpeed : speedFromLayer,
+				maxShift: Number.isFinite(maxShift) ? Math.max(24, maxShift) : 140,
+				scaleFrom: Number.isFinite(scaleFrom) ? scaleFrom : 1,
+				scaleDelta: Number.isFinite(scaleTarget) ? scaleTarget - (Number.isFinite(scaleFrom) ? scaleFrom : 1) : 0,
+			};
+		})
+		.filter(Boolean);
+
+	if (!portfolioParallaxNodes.length) {
+		return;
+	}
+
+	if (!portfolioParallaxScrollBound) {
+		window.addEventListener('scroll', () => {
+			queuePortfolioParallaxUpdate(window.scrollY);
+		}, { passive: true });
+
+		portfolioParallaxScrollBound = true;
+	}
+
+	if (!portfolioParallaxResizeBound) {
+		window.addEventListener('resize', () => {
+			queuePortfolioParallaxUpdate(portfolioLenis ? portfolioLenis.scroll : window.scrollY);
+		}, { passive: true });
+
+		portfolioParallaxResizeBound = true;
+	}
+
+	queuePortfolioParallaxUpdate(window.scrollY);
+};
+
+const initPortfolioLenis = (onScroll) => {
+	destroyPortfolioLenis();
+
+	if (prefersReducedMotion()) {
+		return;
+	}
+
+	portfolioLenis = new Lenis({
+		duration: 1.35,
+		easing: LENIS_EASING,
+		smoothWheel: true,
+		syncTouch: false,
+		wheelMultiplier: 0.95,
+		touchMultiplier: 1,
+	});
+
+	portfolioLenis.on('scroll', ({ scroll }) => {
+		if (typeof onScroll === 'function') {
+			onScroll(scroll);
+		}
+
+		queuePortfolioParallaxUpdate(scroll);
+	});
+
+	const raf = (time) => {
+		if (portfolioLenis) {
+			portfolioLenis.raf(time);
+			portfolioLenisRafId = window.requestAnimationFrame(raf);
+		}
+	};
+
+	portfolioLenisRafId = window.requestAnimationFrame(raf);
+};
+
+const smoothScrollTo = (target, options = {}) => {
+	if (portfolioLenis && !prefersReducedMotion()) {
+		portfolioLenis.scrollTo(target, {
+			duration: 1.25,
+			easing: LENIS_EASING,
+			...options,
+		});
+
+		return;
+	}
+
+	const numericTarget = typeof target === 'number' ? target : 0;
+	const top = Math.max(0, numericTarget + (Number.isFinite(options.offset) ? options.offset : 0));
+
+	window.scrollTo({
+		top,
+		behavior: options.immediate ? 'auto' : 'smooth',
+	});
+};
 
 const initGlobalIcons = () => {
 	try {
@@ -120,10 +338,7 @@ const scrollToCurrentHashTarget = () => {
 	const topOffset = 110;
 	const top = Math.max(target.getBoundingClientRect().top + window.scrollY - topOffset, 0);
 
-	window.scrollTo({
-		top,
-		behavior: 'smooth',
-	});
+	smoothScrollTo(top, { immediate: true });
 };
 
 const syncHashScroll = () => {
@@ -444,6 +659,9 @@ const initPortfolioPage = () => {
 	const pageRoot = document.querySelector('[data-portfolio-root]');
 
 	if (!pageRoot) {
+		destroyPortfolioLenis();
+		clearPortfolioParallax();
+
 		return;
 	}
 
@@ -557,6 +775,11 @@ const initPortfolioPage = () => {
 		}
 	};
 
+	initPortfolioParallax(pageRoot);
+	initPortfolioLenis(() => {
+		handleScrollEffects();
+	});
+
 	handleScrollEffects();
 
 	if (!window.__portfolioScrollBound) {
@@ -569,12 +792,41 @@ const initPortfolioPage = () => {
 	if (backToTopButton) {
 		if (backToTopButton.dataset.boundBackTop !== '1') {
 			backToTopButton.addEventListener('click', () => {
-				window.scrollTo({ top: 0, behavior: 'smooth' });
+				smoothScrollTo(0);
 			});
 
 			backToTopButton.dataset.boundBackTop = '1';
 		}
 	}
+
+	const inPageAnchors = pageRoot.querySelectorAll('a[href^="#"]');
+
+	inPageAnchors.forEach((anchor) => {
+		if (!(anchor instanceof HTMLAnchorElement) || anchor.dataset.boundLenisAnchor === '1') {
+			return;
+		}
+
+		anchor.addEventListener('click', (event) => {
+			const href = anchor.getAttribute('href') || '';
+
+			if (!href || href === '#') {
+				return;
+			}
+
+			const targetId = window.decodeURIComponent(href.slice(1));
+			const target = document.getElementById(targetId);
+
+			if (!(target instanceof HTMLElement)) {
+				return;
+			}
+
+			event.preventDefault();
+			history.replaceState(null, '', href);
+			smoothScrollTo(target, { offset: -110 });
+		});
+
+		anchor.dataset.boundLenisAnchor = '1';
+	});
 
 	const roleElement = document.getElementById('typing-role');
 

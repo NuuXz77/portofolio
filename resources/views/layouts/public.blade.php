@@ -1,95 +1,110 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-theme="dark">
-    <head>
-        @php
-            $seo = \App\Support\PortfolioContent::get('seo', []);
-            $navbar = \App\Support\PortfolioContent::get('navbar', []);
-            $brandName = trim((string) ($navbar['logo_text'] ?? 'Wisnu.dev'));
 
-            if ($brandName === '') {
-                $brandName = 'Wisnu.dev';
-            }
+<head>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{asset('images/favicon/android-chrome-192x192.png')}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{asset('images/favicon/favicon-32x32.png')}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('images/favicon/favicon-16x16.png')}}">
+    <link rel="manifest" href="{{asset('images/favicon/site.webmanifest')}}">
+    @php
+        $seo = \App\Support\PortfolioContent::get('seo', []);
+        $navbar = \App\Support\PortfolioContent::get('navbar', []);
+        $brandName = trim((string) ($navbar['logo_text'] ?? 'Wisnu.dev'));
 
-            $seoTitle = trim((string) ($seo['title'] ?? ''));
-            $isSeedSeoTitle = strcasecmp($seoTitle, 'Wisnu.dev | Fullstack Web Developer') === 0;
+        if ($brandName === '') {
+            $brandName = 'Wisnu.dev';
+        }
 
-            $defaultTitle = $seoTitle !== '' && ! $isSeedSeoTitle
-                ? $seoTitle
-                : ($brandName.' | Fullstack Web Developer');
+        $seoTitle = trim((string) ($seo['title'] ?? ''));
+        $isSeedSeoTitle = strcasecmp($seoTitle, 'Wisnu.dev | Fullstack Web Developer') === 0;
 
-            $defaultDescription = (string) ($seo['description'] ?? 'Premium personal portfolio of a Fullstack Web Developer focused on scalable web apps, API development, and DevOps deployment.');
-            $defaultKeywords = (string) ($seo['keywords'] ?? 'fullstack developer, laravel developer, nextjs developer, devops engineer, portfolio');
-            $defaultAuthor = $brandName;
+        $defaultTitle = $seoTitle !== '' && !$isSeedSeoTitle ? $seoTitle : $brandName . ' | Fullstack Web Developer';
 
-            $metaTitle = trim((string) $__env->yieldContent('title', $defaultTitle));
-            $metaDescription = trim((string) $__env->yieldContent('description', $defaultDescription));
-            $metaKeywords = trim((string) $__env->yieldContent('keywords', $defaultKeywords));
-            $metaAuthor = trim((string) $__env->yieldContent('author', $defaultAuthor));
+        $defaultDescription =
+            (string) ($seo['description'] ??
+                'Premium personal portfolio of a Fullstack Web Developer focused on scalable web apps, API development, and DevOps deployment.');
+        $defaultKeywords =
+            (string) ($seo['keywords'] ??
+                'fullstack developer, laravel developer, nextjs developer, devops engineer, portfolio');
+        $defaultAuthor = $brandName;
 
-            $metaOgTitle = trim((string) $__env->yieldContent('og_title', $metaTitle));
-            $metaOgDescription = trim((string) $__env->yieldContent('og_description', $metaDescription));
-            $metaOgImage = trim((string) $__env->yieldContent('og_image', 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1600&q=80'));
+        $metaTitle = trim((string) $__env->yieldContent('title', $defaultTitle));
+        $metaDescription = trim((string) $__env->yieldContent('description', $defaultDescription));
+        $metaKeywords = trim((string) $__env->yieldContent('keywords', $defaultKeywords));
+        $metaAuthor = trim((string) $__env->yieldContent('author', $defaultAuthor));
 
-            if ($metaTitle === '') {
-                $metaTitle = $defaultTitle;
-            }
+        $metaOgTitle = trim((string) $__env->yieldContent('og_title', $metaTitle));
+        $metaOgDescription = trim((string) $__env->yieldContent('og_description', $metaDescription));
+        $metaOgImage = trim(
+            (string) $__env->yieldContent(
+                'og_image',
+                'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1600&q=80',
+            ),
+        );
 
-            if ($metaDescription === '') {
-                $metaDescription = $defaultDescription;
-            }
+        if ($metaTitle === '') {
+            $metaTitle = $defaultTitle;
+        }
 
-            if ($metaKeywords === '') {
-                $metaKeywords = $defaultKeywords;
-            }
+        if ($metaDescription === '') {
+            $metaDescription = $defaultDescription;
+        }
 
-            if ($metaAuthor === '') {
-                $metaAuthor = $defaultAuthor;
-            }
+        if ($metaKeywords === '') {
+            $metaKeywords = $defaultKeywords;
+        }
 
-            if ($metaOgTitle === '') {
-                $metaOgTitle = $metaTitle;
-            }
+        if ($metaAuthor === '') {
+            $metaAuthor = $defaultAuthor;
+        }
 
-            if ($metaOgDescription === '') {
-                $metaOgDescription = $metaDescription;
-            }
+        if ($metaOgTitle === '') {
+            $metaOgTitle = $metaTitle;
+        }
 
-            if ($metaOgImage === '') {
-                $metaOgImage = 'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1600&q=80';
-            }
-        @endphp
+        if ($metaOgDescription === '') {
+            $metaOgDescription = $metaDescription;
+        }
 
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+        if ($metaOgImage === '') {
+            $metaOgImage =
+                'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1600&q=80';
+        }
+    @endphp
 
-        <title>{{ $metaTitle }}</title>
-        <meta name="description" content="{{ $metaDescription }}">
-        <meta name="keywords" content="{{ $metaKeywords }}">
-        <meta name="author" content="{{ $metaAuthor }}">
-        <meta name="robots" content="index, follow">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="{{ $metaOgTitle }}">
-        <meta property="og:description" content="{{ $metaOgDescription }}">
-        <meta property="og:image" content="{{ $metaOgImage }}">
+    <title>{{ $metaTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
+    <meta name="keywords" content="{{ $metaKeywords }}">
+    <meta name="author" content="{{ $metaAuthor }}">
+    <meta name="robots" content="index, follow">
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="portfolio-root bg-base-100 text-base-content antialiased">
-        <div id="portfolio" data-portfolio-root class="relative overflow-x-clip bg-base-100 text-base-content">
-            <div aria-hidden="true" class="portfolio-background pointer-events-none">
-                <div class="portfolio-grid"></div>
-                <div class="portfolio-glow portfolio-glow-top-left"></div>
-                <div class="portfolio-glow portfolio-glow-bottom-right"></div>
-                <div class="portfolio-glow portfolio-glow-center"></div>
-                <div class="portfolio-noise"></div>
-                <div class="portfolio-vignette"></div>
-            </div>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $metaOgTitle }}">
+    <meta property="og:description" content="{{ $metaOgDescription }}">
+    <meta property="og:image" content="{{ $metaOgImage }}">
 
-            <div class="relative z-10">
-                @yield('content')
-            </div>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="portfolio-root bg-base-100 text-base-content antialiased">
+    <div id="portfolio" data-portfolio-root class="relative overflow-x-clip bg-base-100 text-base-content">
+        <div aria-hidden="true" class="portfolio-background pointer-events-none">
+            <div class="portfolio-grid"></div>
+            <div class="portfolio-glow portfolio-glow-top-left"></div>
+            <div class="portfolio-glow portfolio-glow-bottom-right"></div>
+            <div class="portfolio-glow portfolio-glow-center"></div>
+            <div class="portfolio-noise"></div>
+            <div class="portfolio-vignette"></div>
         </div>
-    </body>
+
+        <div class="relative z-10">
+            @yield('content')
+        </div>
+    </div>
+</body>
+
 </html>

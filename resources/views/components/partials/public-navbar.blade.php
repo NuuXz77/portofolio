@@ -164,4 +164,4 @@
     </div>
 </header>
 
-<div aria-hidden="true" class="h-10 sm:h-20"></div>
+<div aria-hidden="true" class="h-20"></div>
