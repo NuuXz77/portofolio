@@ -95,7 +95,8 @@
     $aboutTitle = $about['title'] ?? 'About Me';
     $aboutDescription = $about['description'] ?? '<p>Dynamic about description can be managed from admin panel.</p>';
     $aboutStats = $about['stats'] ?? [];
-    $aboutImage = $resolveAsset($about['image'] ?? null, 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=80');
+    $aboutImagePath = trim((string) ($about['profile_image'] ?? $about['image'] ?? ''));
+    $aboutImage = $aboutImagePath !== '' ? $resolveAsset($aboutImagePath, '') : '';
 
     $defaultTechnologyLogos = collect(config('technology-icons', []))
         ->map(function (array $icon): array {
@@ -244,7 +245,13 @@
                 <div class="min-w-0">
                     <div data-aos="fade-up" data-aos-duration="800" class="min-w-0">
                         <div class="portfolio-glass relative overflow-hidden rounded-4xl border border-white/10 p-4 shadow-2xl">
-                            <img loading="lazy" src="{{ $aboutImage }}" alt="Professional portrait" class="h-108 w-full rounded-3xl object-cover">
+                            @if ($aboutImage !== '')
+                                <img loading="lazy" src="{{ $aboutImage }}" alt="Professional portrait" class="h-108 w-full rounded-3xl object-cover">
+                            @else
+                                <div class="flex h-108 w-full items-center justify-center rounded-3xl border border-dashed border-white/20 bg-base-100/45 text-center">
+                                    <p class="px-6 text-sm text-base-content/65">Set About profile image from CMS.</p>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>

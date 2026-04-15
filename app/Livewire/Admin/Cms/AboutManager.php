@@ -32,7 +32,7 @@ class AboutManager extends Component
 
         $this->title = $about['title'] ?? '';
         $this->description = $about['description'] ?? '';
-        $this->existingImage = $about['image'] ?? null;
+        $this->existingImage = $about['profile_image'] ?? $about['image'] ?? null;
 
         $this->statsText = collect($stats)
             ->map(fn (array $stat) => trim((string) ($stat['label'] ?? '')).' | '.trim((string) ($stat['value'] ?? '')))
@@ -124,6 +124,7 @@ class AboutManager extends Component
             'title' => $this->title,
             'description' => $this->description,
             'stats' => $stats,
+            'profile_image' => $image,
             'image' => $image,
         ]);
 
