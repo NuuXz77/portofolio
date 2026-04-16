@@ -1073,6 +1073,126 @@ html[data-theme='light'] [data-admin-live-users] .apexcharts-tooltip-title {
     color: rgba(148, 163, 184, 0.7);
 }
 
+.journal-content h1,
+.journal-content h2,
+.journal-content h3,
+.journal-content h4,
+.journal-content h5,
+.journal-content h6 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.6rem;
+    font-family: var(--font-display);
+    line-height: 1.25;
+    color: rgb(241, 245, 249);
+}
+
+.journal-content h1 {
+    font-size: clamp(1.8rem, 3.8vw, 2.45rem);
+}
+
+.journal-content h2 {
+    font-size: clamp(1.45rem, 3vw, 1.95rem);
+}
+
+.journal-content h3 {
+    font-size: clamp(1.24rem, 2.45vw, 1.55rem);
+}
+
+.journal-content h4 {
+    font-size: 1.12rem;
+}
+
+.journal-content h5 {
+    font-size: 1rem;
+}
+
+.journal-content h6 {
+    font-size: 0.92rem;
+    opacity: 0.9;
+}
+
+.journal-content p {
+    margin-top: 0.92rem;
+    margin-bottom: 0.92rem;
+}
+
+.journal-content ul,
+.journal-content ol {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 1.1rem;
+    padding-left: 1rem;
+}
+
+.journal-content ul {
+    list-style: disc;
+}
+
+.journal-content ol {
+    list-style: decimal;
+}
+
+.journal-content li {
+    margin-top: 0.36rem;
+    margin-bottom: 0.36rem;
+}
+
+.journal-content li > p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.journal-content li[data-list='bullet'],
+.journal-content li[data-list='ordered'],
+.journal-content li[data-list='checked'],
+.journal-content li[data-list='unchecked'] {
+    list-style-type: none;
+    position: relative;
+}
+
+.journal-content li[data-list='bullet']::before {
+    content: '\2022';
+    position: absolute;
+    left: -1.05rem;
+    color: rgba(186, 230, 253, 0.95);
+}
+
+.journal-content li[data-list='ordered'] {
+    list-style-type: decimal;
+}
+
+.journal-content li[data-list='checked']::before,
+.journal-content li[data-list='unchecked']::before {
+    position: absolute;
+    left: -1.22rem;
+    font-size: 0.95em;
+    color: rgba(125, 211, 252, 0.95);
+}
+
+.journal-content li[data-list='checked']::before {
+    content: '\2611';
+}
+
+.journal-content li[data-list='unchecked']::before {
+    content: '\2610';
+}
+
+.journal-content .ql-size-small {
+    font-size: 0.86em;
+}
+
+.journal-content .ql-size-large {
+    font-size: 1.24em;
+}
+
+.journal-content .ql-size-huge {
+    font-size: 1.56em;
+}
+
+.journal-content .ql-font-serif {
+    font-family: Georgia, Times New Roman, serif;
+}
+
 .journal-content .ql-font-monospace,
 .journal-content code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
@@ -1193,6 +1313,24 @@ html[data-theme='light'] .journal-content :not(pre) > code {
     border-color: rgba(100, 116, 139, 0.26);
     background: rgba(226, 232, 240, 0.68);
     color: rgb(3, 105, 161);
+}
+
+html[data-theme='light'] .journal-content h1,
+html[data-theme='light'] .journal-content h2,
+html[data-theme='light'] .journal-content h3,
+html[data-theme='light'] .journal-content h4,
+html[data-theme='light'] .journal-content h5,
+html[data-theme='light'] .journal-content h6 {
+    color: rgb(15, 23, 42);
+}
+
+html[data-theme='light'] .journal-content li[data-list='bullet']::before {
+    color: rgba(14, 116, 144, 0.85);
+}
+
+html[data-theme='light'] .journal-content li[data-list='checked']::before,
+html[data-theme='light'] .journal-content li[data-list='unchecked']::before {
+    color: rgba(14, 116, 144, 0.88);
 }
 
 html[data-theme='light'] .journal-content pre,
