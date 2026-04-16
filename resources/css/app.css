@@ -1353,6 +1353,82 @@ html[data-theme='light'] .journal-content blockquote {
     background: rgba(14, 116, 144, 0.08);
 }
 
+.journal-comment-card {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    animation: journal-comment-fade-in 300ms ease forwards;
+}
+
+.journal-reply-composer {
+    transform-origin: top;
+    animation: journal-reply-expand 220ms ease;
+}
+
+.journal-like-btn {
+    transition:
+        transform 180ms ease,
+        color 180ms ease,
+        border-color 180ms ease,
+        background-color 180ms ease;
+}
+
+.journal-like-btn:active {
+    transform: scale(0.95);
+}
+
+.journal-like-btn.is-active {
+    animation: journal-like-bounce 260ms ease;
+}
+
+@keyframes journal-comment-fade-in {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes journal-reply-expand {
+    from {
+        opacity: 0;
+        transform: scaleY(0.94);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
+@keyframes journal-like-bounce {
+    0% {
+        transform: scale(0.94);
+    }
+
+    52% {
+        transform: scale(1.08);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .journal-comment-card,
+    .journal-reply-composer,
+    .journal-like-btn,
+    .journal-like-btn.is-active {
+        animation: none !important;
+        transition: none !important;
+        transform: none !important;
+    }
+}
+
 .tech-logo-marquee {
     position: relative;
     width: min(100%, 34rem);

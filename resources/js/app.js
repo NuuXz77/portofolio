@@ -33,6 +33,7 @@ let portfolioParallaxFrameId = null;
 let portfolioParallaxPendingScroll = 0;
 let portfolioParallaxScrollBound = false;
 let portfolioParallaxResizeBound = false;
+let journalInteractionEventsBound = false;
 
 const LENIS_EASING = (value) => 1 - Math.pow(1 - value, 3);
 
@@ -1208,6 +1209,162 @@ const initJournalEditors = () => {
 	});
 };
 
+const readStorageObject = (key) => {
+	try {
+		const raw = localStorage.getItem(key);
+
+		if (!raw) {
+			return {};
+		}
+
+		const parsed = JSON.parse(raw);
+
+		if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+			return parsed;
+		}
+	} catch {
+		// Ignore malformed storage.
+	}
+
+	return {};
+};
+
+const writeStorageObject = (key, value) => {
+	try {
+		localStorage.setItem(key, JSON.stringify(value));
+	} catch {
+		// Ignore storage errors.
+	}
+};
+
+const syncJournalLikeStorage = (kind, targetId, liked) => {
+	const numericId = Number.parseInt(String(targetId || ''), 10);
+
+	if (!Number.isFinite(numericId) || numericId <= 0) {
+		return;
+	}
+
+	const storageKey = kind === 'comment' ? 'journal_comment_likes' : 'journal_article_likes';
+	const snapshot = readStorageObject(storageKey);
+
+	if (liked) {
+		snapshot[numericId] = true;
+	} else {
+		delete snapshot[numericId];
+	}
+
+	writeStorageObject(storageKey, snapshot);
+};
+
+const initJournalInteractions = () => {
+	const journalRoot = document.querySelector('[data-journal-interaction]');
+
+	if (!(journalRoot instanceof HTMLElement)) {
+		return;
+	}
+
+	const guestToken = (journalRoot.dataset.guestToken || '').trim();
+
+	if (guestToken !== '') {
+		try {
+			localStorage.setItem('journal_guest_token', guestToken);
+		} catch {
+			// Ignore storage errors.
+		}
+	}
+
+	const copyButtons = journalRoot.querySelectorAll('[data-copy-link-button]');
+	const rootShareUrl = (journalRoot.dataset.shareUrl || '').trim();
+
+	const sanitizeShareUrl = (rawUrl) => {
+		const candidate = String(rawUrl || '').trim();
+
+		if (candidate === '') {
+			return '';
+		}
+
+		try {
+			const parsed = new URL(candidate, window.location.origin);
+
+			if (parsed.pathname === '/livewire/update') {
+				return '';
+			}
+
+			return parsed.toString();
+		} catch {
+			return '';
+		}
+	};
+
+	copyButtons.forEach((button) => {
+		if (!(button instanceof HTMLButtonElement) || button.dataset.boundCopy === '1') {
+			return;
+		}
+
+		button.addEventListener('click', async () => {
+			const url = sanitizeShareUrl(button.dataset.shareUrl)
+				|| sanitizeShareUrl(rootShareUrl)
+				|| sanitizeShareUrl(window.location.href);
+
+			if (!url) {
+				return;
+			}
+
+			let copied = false;
+
+			if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+				try {
+					await navigator.clipboard.writeText(url);
+					copied = true;
+				} catch {
+					copied = false;
+				}
+			}
+
+			if (!copied) {
+				const input = document.createElement('input');
+				input.value = url;
+				input.style.position = 'fixed';
+				input.style.opacity = '0';
+				document.body.appendChild(input);
+				input.focus();
+				input.select();
+
+				try {
+					copied = document.execCommand('copy');
+				} catch {
+					copied = false;
+				}
+
+				input.remove();
+			}
+
+			window.dispatchEvent(new CustomEvent('app-toast', {
+				detail: copied
+					? { type: 'success', message: 'Link copied!' }
+					: { type: 'error', message: 'Gagal menyalin link.' },
+			}));
+		});
+
+		button.dataset.boundCopy = '1';
+	});
+
+	if (journalInteractionEventsBound) {
+		return;
+	}
+
+	window.addEventListener('journal-like-sync', (event) => {
+		const detail = Array.isArray(event.detail) ? (event.detail[0] || {}) : (event.detail || {});
+		const kind = String(detail.kind || '').toLowerCase() === 'comment' ? 'comment' : 'article';
+		const targetId = detail.targetId;
+		const liked = Boolean(detail.liked);
+
+		syncJournalLikeStorage(kind, targetId, liked);
+	});
+
+	journalInteractionEventsBound = true;
+};
+
 const destroyLiveUsersChart = () => {
 	if (liveUsersPollIntervalId) {
 		window.clearInterval(liveUsersPollIntervalId);
@@ -1580,6 +1737,7 @@ const initApp = () => {
 	initPortfolioPage();
 	syncHashScroll();
 	initJournalEditors();
+	initJournalInteractions();
 	initVisitorHeartbeat();
 	initAdminLiveUsersChart();
 };
@@ -1592,6 +1750,7 @@ document.addEventListener('livewire:navigated', () => {
 	initPortfolioPage();
 	syncHashScroll();
 	initJournalEditors();
+	initJournalInteractions();
 	initVisitorHeartbeat();
 	initAdminLiveUsersChart();
 });
@@ -1602,6 +1761,7 @@ document.addEventListener('livewire:init', () => {
 	initPortfolioPage();
 	syncHashScroll();
 	initJournalEditors();
+	initJournalInteractions();
 	initVisitorHeartbeat();
 	initAdminLiveUsersChart();
 });

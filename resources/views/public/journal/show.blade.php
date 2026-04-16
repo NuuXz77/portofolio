@@ -11,7 +11,10 @@
         return \Illuminate\Support\Facades\Storage::url($path);
     };
 
-    $shareUrl = request()->fullUrl();
+    $shareUrl = route('journal.show', $article->slug);
+    $shareUrlEncoded = urlencode($shareUrl);
+    $shareWhatsappTextEncoded = urlencode($article->title.' - '.$shareUrl);
+    $shareTwitterTextEncoded = urlencode($article->title);
 
     $logoText = (string) ($logoText ?? 'Wisnu.dev');
     $brandMode = in_array(($brandMode ?? 'text'), ['text', 'logo', 'combo'], true)
@@ -25,9 +28,28 @@
     $navItems = is_array($navItems ?? null) ? $navItems : [];
     $ctaText = (string) ($ctaText ?? 'Hire Me');
     $ctaLink = (string) ($ctaLink ?? route('home').'#contact');
+
+    $likedCommentLookup = [];
+
+    foreach (($likedCommentIds ?? []) as $likedCommentId) {
+        $likedCommentLookup[(int) $likedCommentId] = true;
+    }
+
+    $ownedCommentLookup = [];
+
+    foreach (($ownedCommentIds ?? []) as $ownedCommentId) {
+        $ownedCommentLookup[(int) $ownedCommentId] = true;
+    }
+
+    $guestTokenForClient = (string) ($guestToken ?? '');
 @endphp
 
-<div>
+<div
+    data-journal-interaction
+    data-guest-token="{{ $guestTokenForClient }}"
+    data-article-id="{{ $article->id }}"
+    data-share-url="{{ $shareUrl }}"
+>
     <x-partials.public-navbar
         :logoText="$logoText"
         :brandMode="$brandMode"
@@ -80,11 +102,146 @@
                     </div>
                 </div>
 
-                <div class="mt-6 flex flex-wrap items-center gap-2">
-                    <span class="text-sm text-base-content/60">Share:</span>
-                    <a href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ urlencode($article->title) }}" target="_blank" rel="noreferrer" class="btn btn-outline btn-xs rounded-xl">Twitter</a>
-                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" target="_blank" rel="noreferrer" class="btn btn-outline btn-xs rounded-xl">LinkedIn</a>
-                </div>
+                <section class="mt-8 grid gap-4 rounded-2xl border border-white/10 bg-base-100/60 p-4 shadow-xl sm:grid-cols-[1fr_auto] sm:items-center sm:p-5">
+                    <div>
+                        <p class="text-sm font-semibold text-base-content">Share this article</p>
+                        <p class="mt-1 text-xs text-base-content/65">Bagikan ke temanmu atau simpan link untuk dibaca nanti.</p>
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm rounded-xl"
+                                data-copy-link-button
+                                data-share-url="{{ $shareUrl }}"
+                            >
+                                <i data-lucide="link" class="h-4 w-4"></i>
+                                Copy Link
+                            </button>
+
+                            <a href="https://wa.me/?text={{ $shareWhatsappTextEncoded }}" target="_blank" rel="noreferrer" class="btn btn-outline btn-sm rounded-xl">
+                                <i data-lucide="message-circle" class="h-4 w-4"></i>
+                                WhatsApp
+                            </a>
+
+                            <a href="https://twitter.com/intent/tweet?url={{ $shareUrlEncoded }}&text={{ $shareTwitterTextEncoded }}" target="_blank" rel="noreferrer" class="btn btn-outline btn-sm rounded-xl">
+                                <img src="https://cdn.simpleicons.org/x/E5E7EB" alt="Twitter" class="h-3.5 w-3.5" loading="lazy">
+                                Twitter
+                            </a>
+
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ $shareUrlEncoded }}" target="_blank" rel="noreferrer" class="btn btn-outline btn-sm rounded-xl">
+                                <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 fill-current" role="img">
+                                    <path d="M20.45 20.45h-3.56v-5.58c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.15 1.45-2.15 2.94v5.68H9.33V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.23 0H1.77A1.76 1.76 0 0 0 0 1.74v20.52C0 23.23.79 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.74V1.74A1.76 1.76 0 0 0 22.23 0z" />
+                                </svg>
+                                LinkedIn
+                            </a>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        wire:click="toggleArticleLike"
+                        wire:loading.attr="disabled"
+                        wire:target="toggleArticleLike"
+                        class="journal-like-btn btn rounded-2xl px-5 {{ $articleLikedByMe ? 'is-active btn-info' : 'btn-outline' }}"
+                    >
+                        <i data-lucide="heart" class="h-4 w-4"></i>
+                        <span>{{ number_format($articleLikesCount) }} likes</span>
+                    </button>
+                </section>
+
+                <section id="comments" class="mt-8 rounded-2xl border border-white/10 bg-base-100/60 p-4 shadow-xl sm:p-5">
+                    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-xl font-semibold text-base-content sm:text-2xl">Discussion</h2>
+                        <span class="badge badge-outline badge-info rounded-full">{{ number_format($totalCommentsCount) }} comments</span>
+                    </div>
+
+                    <form wire:submit="postComment" class="space-y-3">
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <label class="form-control">
+                                <span class="label">
+                                    <span class="label-text text-xs text-base-content/65">Name</span>
+                                </span>
+                                <input
+                                    type="text"
+                                    wire:model.defer="guestName"
+                                    class="input input-bordered w-full rounded-xl border-white/15 bg-base-100/70"
+                                    placeholder="Your name"
+                                >
+                            </label>
+
+                            <label class="form-control">
+                                <span class="label">
+                                    <span class="label-text text-xs text-base-content/65">Email (optional)</span>
+                                </span>
+                                <input
+                                    type="email"
+                                    wire:model.defer="guestEmail"
+                                    class="input input-bordered w-full rounded-xl border-white/15 bg-base-100/70"
+                                    placeholder="you@example.com"
+                                >
+                            </label>
+                        </div>
+
+                        <label class="form-control">
+                            <span class="label">
+                                <span class="label-text text-xs text-base-content/65">Comment</span>
+                            </span>
+                            <textarea
+                                wire:model.defer="commentBody"
+                                rows="4"
+                                class="textarea textarea-bordered w-full rounded-xl border-white/15 bg-base-100/70"
+                                placeholder="Write your thoughts..."
+                            ></textarea>
+                        </label>
+
+                        @error('guestName')
+                            <p class="text-xs text-error">{{ $message }}</p>
+                        @enderror
+                        @error('guestEmail')
+                            <p class="text-xs text-error">{{ $message }}</p>
+                        @enderror
+                        @error('commentBody')
+                            <p class="text-xs text-error">{{ $message }}</p>
+                        @enderror
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                            <p class="text-xs text-base-content/60">Tanpa login. Komentar milikmu dikenali dari browser ini.</p>
+                            <button type="submit" class="btn btn-info rounded-xl" wire:loading.attr="disabled" wire:target="postComment">
+                                <span wire:loading.remove wire:target="postComment">Post Comment</span>
+                                <span wire:loading wire:target="postComment" class="loading loading-spinner loading-sm"></span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="mt-6 space-y-4" aria-live="polite">
+                    @if ($comments->isEmpty())
+                        <article class="rounded-2xl border border-dashed border-white/20 bg-base-100/45 p-8 text-center">
+                            <p class="text-base font-semibold text-base-content">Belum ada komentar</p>
+                            <p class="mt-1 text-sm text-base-content/65">Jadilah orang pertama yang memulai diskusi.</p>
+                        </article>
+                    @else
+                        @foreach ($comments as $comment)
+                            @include('public.journal.partials.comment-item', [
+                                'comment' => $comment,
+                                'level' => 0,
+                                'ownedCommentLookup' => $ownedCommentLookup,
+                                'likedCommentLookup' => $likedCommentLookup,
+                            ])
+                        @endforeach
+
+                        @if ($hasMoreComments)
+                            <div class="pt-2 text-center">
+                                <button
+                                    type="button"
+                                    wire:click="loadMoreComments"
+                                    class="btn btn-outline rounded-xl"
+                                >
+                                    Load more comments
+                                </button>
+                            </div>
+                        @endif
+                    @endif
+                </section>
             </div>
         </article>
 
