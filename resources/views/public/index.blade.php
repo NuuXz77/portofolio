@@ -1,4 +1,6 @@
 @php
+    $localeText = static fn (mixed $value, string $default = ''): string => \App\Support\LocalizedContent::resolve($value, default: $default);
+
     $resolveAsset = function (?string $path, string $fallback = ''): string {
         if (! $path) {
             return $fallback;
@@ -12,15 +14,19 @@
     };
 
     $navItems = $menuItems->isNotEmpty()
-        ? $menuItems->map(fn ($item) => ['href' => $item->href, 'label' => $item->label])->all()
+        ? $menuItems->map(fn ($item) => [
+            'href' => $item->href,
+            'label' => $localeText($item->label, __('navigation.home')),
+        ])->all()
         : [
-            ['href' => '#home', 'label' => 'Home'],
-            ['href' => '#about', 'label' => 'About'],
-            ['href' => '#skills', 'label' => 'Skills'],
-            ['href' => '#projects', 'label' => 'Projects'],
-            ['href' => '#experience', 'label' => 'Experience'],
-            ['href' => route('journal.index'), 'label' => 'Journal'],
-            ['href' => '#contact', 'label' => 'Contact'],
+            ['href' => '#home', 'label' => __('navigation.home')],
+            ['href' => '#about', 'label' => __('navigation.about')],
+            ['href' => '#education', 'label' => __('navigation.education')],
+            ['href' => '#skills', 'label' => __('navigation.skills')],
+            ['href' => '#projects', 'label' => __('navigation.projects')],
+            ['href' => '#experience', 'label' => __('navigation.experience')],
+            ['href' => route('journal.index'), 'label' => __('navigation.journal')],
+            ['href' => '#contact', 'label' => __('navigation.contact')],
         ];
 
     $journalHref = route('journal.index');
@@ -31,15 +37,16 @@
             $href = trim((string) ($item['href'] ?? ''));
 
             return strcasecmp($label, 'Journal') === 0
+                || strcasecmp($label, __('navigation.journal')) === 0
                 || strcasecmp($href, '#journal') === 0
                 || strcasecmp($href, $journalHref) === 0;
         })
         ->values()
         ->all();
 
-    $navItems[] = ['href' => $journalHref, 'label' => 'Journal'];
+    $navItems[] = ['href' => $journalHref, 'label' => __('navigation.journal')];
 
-    $logoText = $navbar['logo_text'] ?? 'Wisnu.dev';
+    $logoText = $localeText($navbar['logo_text'] ?? 'Wisnu.dev', 'Wisnu.dev');
     $rawBrandMode = (string) ($navbar['brand_mode'] ?? 'text');
     $rawBrandLogoType = (string) ($navbar['brand_logo_type'] ?? 'image');
 
@@ -52,13 +59,17 @@
         : 'image';
     $brandLogoImage = isset($navbar['brand_logo_image']) ? trim((string) $navbar['brand_logo_image']) : null;
     $brandLogoIcon = trim((string) ($navbar['brand_logo_icon'] ?? 'sparkles'));
-    $ctaText = $navbar['cta_text'] ?? 'Hire Me';
+    $ctaText = $localeText($navbar['cta_text'] ?? __('navigation.hire_me'), __('navigation.hire_me'));
     $ctaLink = $navbar['cta_link'] ?? '#contact';
 
-    $heroHeadline = $hero['headline'] ?? 'Fullstack Web Developer & Problem Solver';
-    $heroSubheadline = $hero['subheadline'] ?? 'Building scalable web applications with modern technologies.';
+    $heroHeadline = $localeText($hero['headline'] ?? null, 'Fullstack Web Developer & Problem Solver');
+    $heroSubheadline = $localeText($hero['subheadline'] ?? null, 'Building scalable web applications with modern technologies.');
 
     $heroRolesRaw = $hero['roles'] ?? ['Web Developer', 'DevOps Engineer'];
+
+    if (is_array($heroRolesRaw) && (array_key_exists('id', $heroRolesRaw) || array_key_exists('en', $heroRolesRaw))) {
+        $heroRolesRaw = $heroRolesRaw[app()->getLocale()] ?? $heroRolesRaw[config('app.fallback_locale', 'id')] ?? [];
+    }
 
     if (is_array($heroRolesRaw)) {
         $heroRoles = collect($heroRolesRaw)
@@ -78,9 +89,9 @@
         $heroRoles = ['Web Developer', 'DevOps Engineer'];
     }
 
-    $heroPrimaryText = $hero['primary_cta_text'] ?? 'View Projects';
+    $heroPrimaryText = $localeText($hero['primary_cta_text'] ?? null, 'View Projects');
     $heroPrimaryLink = $hero['primary_cta_link'] ?? '#projects';
-    $heroSecondaryText = $hero['secondary_cta_text'] ?? 'Download CV';
+    $heroSecondaryText = $localeText($hero['secondary_cta_text'] ?? null, 'Download CV');
     $heroSecondaryLink = $hero['secondary_cta_link'] ?? '#';
     $heroSecondaryFileRaw = trim((string) ($hero['secondary_cta_file'] ?? ''));
     $heroSecondaryFileUrl = $heroSecondaryFileRaw !== '' ? $resolveAsset($heroSecondaryFileRaw, '') : '';
@@ -92,9 +103,49 @@
 
     $heroImage = $resolveAsset($hero['image'] ?? null, 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80');
 
-    $aboutTitle = $about['title'] ?? 'About Me';
-    $aboutDescription = $about['description'] ?? '<p>Dynamic about description can be managed from admin panel.</p>';
-    $aboutStats = $about['stats'] ?? [];
+    $aboutTitle = $localeText($about['title'] ?? null, 'About Me');
+    $aboutDescription = $localeText($about['description'] ?? null, '<p>Dynamic about description can be managed from admin panel.</p>');
+    $aboutStatsRaw = $about['stats'] ?? [];
+    $landingSections = \App\Support\PortfolioContent::get('landing_sections', []);
+
+    $aboutBadge = $localeText($landingSections['about_badge'] ?? null, __('common.about_badge'));
+    $skillsBadge = $localeText($landingSections['skills_badge'] ?? null, __('common.skills_badge'));
+    $skillsTitle = $localeText($landingSections['skills_title'] ?? null, __('common.skills_title'));
+    $projectsBadge = $localeText($landingSections['projects_badge'] ?? null, __('common.projects_badge'));
+    $projectsTitle = $localeText($landingSections['projects_title'] ?? null, __('common.projects_title'));
+    $featuredBadge = $localeText($landingSections['featured_badge'] ?? null, __('common.featured_badge'));
+    $featuredTitle = $localeText($landingSections['featured_title'] ?? null, __('common.featured_title'));
+    $journalBadge = $localeText($landingSections['journal_badge'] ?? null, __('common.journal_badge'));
+    $journalTitle = $localeText($landingSections['journal_title'] ?? null, __('common.journal_title'));
+    $journeyBadge = $localeText($landingSections['journey_badge'] ?? null, __('common.journey_badge'));
+    $journeyTitle = $localeText($landingSections['journey_title'] ?? null, __('common.journey_title'));
+    $educationBadge = $localeText($landingSections['education_badge'] ?? null, __('common.education_badge'));
+    $educationTitle = $localeText($landingSections['education_title'] ?? null, __('common.education_title'));
+    $experienceBadge = $localeText($landingSections['experience_badge'] ?? null, __('common.experience_badge'));
+    $experienceTitle = $localeText($landingSections['experience_title'] ?? null, __('common.experience_title'));
+    $servicesBadge = $localeText($landingSections['services_badge'] ?? null, __('common.services_badge'));
+    $servicesTitle = $localeText($landingSections['services_title'] ?? null, __('common.services_title'));
+    $testimonialsBadge = $localeText($landingSections['testimonials_badge'] ?? null, __('common.testimonials_badge'));
+    $testimonialsTitle = $localeText($landingSections['testimonials_title'] ?? null, __('common.testimonials_title'));
+
+    if (is_array($aboutStatsRaw) && (array_key_exists('id', $aboutStatsRaw) || array_key_exists('en', $aboutStatsRaw))) {
+        $aboutStatsRaw = $aboutStatsRaw[app()->getLocale()] ?? $aboutStatsRaw[config('app.fallback_locale', 'id')] ?? [];
+    }
+
+    $aboutStats = collect($aboutStatsRaw)
+        ->map(function ($stat) use ($localeText): ?array {
+            if (! is_array($stat)) {
+                return null;
+            }
+
+            return [
+                'label' => $localeText($stat['label'] ?? '', ''),
+                'value' => $localeText($stat['value'] ?? '', ''),
+            ];
+        })
+        ->filter(static fn (?array $stat): bool => is_array($stat) && (($stat['label'] ?? '') !== '' || ($stat['value'] ?? '') !== ''))
+        ->values()
+        ->all();
     $aboutImagePath = trim((string) ($about['profile_image'] ?? $about['image'] ?? ''));
     $aboutImage = $aboutImagePath !== '' ? $resolveAsset($aboutImagePath, '') : '';
 
@@ -180,16 +231,93 @@
     };
 
     $contactLinks = [
-        ['label' => 'Email', 'value' => $contactInfo['email'] ?? '-', 'href' => isset($contactInfo['email']) ? 'mailto:'.$contactInfo['email'] : '#', 'icon' => 'mail'],
+        ['label' => __('common.email'), 'value' => $contactInfo['email'] ?? '-', 'href' => isset($contactInfo['email']) ? 'mailto:'.$contactInfo['email'] : '#', 'icon' => 'mail'],
         ['label' => 'WhatsApp', 'value' => $contactInfo['whatsapp'] ?? '-', 'href' => isset($contactInfo['whatsapp']) ? 'https://wa.me/'.preg_replace('/\D+/', '', $contactInfo['whatsapp']) : '#', 'icon' => 'message-circle'],
-        ['label' => 'LinkedIn', 'value' => $contactInfo['linkedin'] ?? '-', 'href' => $contactInfo['linkedin'] ?? '#', 'icon' => 'linkedin'],
-        ['label' => 'GitHub', 'value' => $contactInfo['github'] ?? '-', 'href' => $contactInfo['github'] ?? '#', 'icon' => 'github'],
+        ['label' => 'LinkedIn', 'value' => $contactInfo['linkedin'] ?? '-', 'href' => $contactInfo['linkedin'] ?? '#', 'icon' => 'brand-linkedin'],
+        ['label' => 'GitHub', 'value' => $contactInfo['github'] ?? '-', 'href' => $contactInfo['github'] ?? '#', 'icon' => 'brand-github'],
     ];
 
-    $footerTagline = $footer['tagline'] ?? 'Open for freelance & collaboration';
-    $footerCta = $footer['cta'] ?? 'Open for freelance & collaboration';
-    $footerCopyright = $footer['copyright'] ?? 'Crafted with precision.';
-    $footerSocials = $footer['socials'] ?? [];
+    $contactBadge = $localeText($contactInfo['contact_badge'] ?? null, __('common.contact'));
+    $contactTitle = $localeText($contactInfo['contact_title'] ?? null, "Let's build something meaningful");
+    $contactDescription = $localeText($contactInfo['contact_description'] ?? null, 'Open for freelance and long-term collaboration. Reach out anytime and I will get back to you quickly.');
+    $contactFormTitle = $localeText($contactInfo['form_title'] ?? null, __('common.send_message'));
+    $contactSubmitText = $localeText($contactInfo['submit_text'] ?? null, __('common.send_message'));
+
+    $footerTagline = $localeText($footer['tagline'] ?? null, __('common.open_for_collaboration'));
+    $footerCta = $localeText($footer['cta'] ?? null, __('common.open_for_collaboration'));
+    $footerCopyright = $localeText($footer['copyright'] ?? null, __('common.footer_crafted'));
+    $resolveFooterSocialIcon = static function (array $social): string {
+        $icon = strtolower(trim((string) ($social['icon'] ?? '')));
+        $icon = str_replace([' ', '_'], '-', $icon);
+
+        if (in_array($icon, ['brand-linkedin', 'linkedin'], true)) {
+            return 'brand-linkedin';
+        }
+
+        if (in_array($icon, ['brand-x', 'x', 'twitter'], true)) {
+            return 'brand-x';
+        }
+
+        if (in_array($icon, ['brand-github', 'github'], true) || str_contains($icon, 'github')) {
+            return 'brand-github';
+        }
+
+        if (in_array($icon, ['wa', 'whatsapp'], true)) {
+            return 'message-circle';
+        }
+
+        if (in_array($icon, ['email'], true)) {
+            return 'mail';
+        }
+
+        if ($icon !== '') {
+            return $icon;
+        }
+
+        $labelAndLink = strtolower(trim((string) ($social['label'] ?? '').' '.(string) ($social['link'] ?? '')));
+
+        if (str_contains($labelAndLink, 'linkedin')) {
+            return 'brand-linkedin';
+        }
+
+        if (str_contains($labelAndLink, 'twitter') || str_contains($labelAndLink, 'x.com')) {
+            return 'brand-x';
+        }
+
+        if (str_contains($labelAndLink, 'github')) {
+            return 'brand-github';
+        }
+
+        if (str_contains($labelAndLink, 'instagram')) {
+            return 'instagram';
+        }
+
+        if (str_contains($labelAndLink, 'youtube')) {
+            return 'youtube';
+        }
+
+        if (str_contains($labelAndLink, 'whatsapp') || str_contains($labelAndLink, 'wa.me')) {
+            return 'message-circle';
+        }
+
+        if (str_contains($labelAndLink, 'mail') || str_contains($labelAndLink, '@')) {
+            return 'mail';
+        }
+
+        return 'link-2';
+    };
+
+    $footerSocials = collect($footer['socials'] ?? [])
+        ->map(function ($item) use ($resolveFooterSocialIcon): array {
+            return [
+                'label' => \App\Support\LocalizedContent::resolve($item['label'] ?? '', default: ''),
+                'link' => trim((string) ($item['link'] ?? '#')),
+                'icon' => $resolveFooterSocialIcon((array) $item),
+            ];
+        })
+        ->filter(static fn (array $item): bool => $item['label'] !== '' && $item['link'] !== '')
+        ->values()
+        ->all();
 @endphp
 
     <div class="relative z-10 overflow-x-hidden">
@@ -257,7 +385,7 @@
                 </div>
 
                 <div data-aos="fade-up" data-aos-duration="800" data-aos-delay="90" class="min-w-0">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">About Me</p>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $aboutBadge }}</p>
                     <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $aboutTitle }}</h2>
                     <div class="prose prose-invert mt-6 max-w-none text-base-content/75">{!! $aboutDescription !!}</div>
 
@@ -307,8 +435,8 @@
         <section id="skills" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-10 text-center" data-aos="fade-up" data-aos-duration="800">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">SKILLS</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">Technology Stack I Use to Ship Reliable Products</h2>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $skillsBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $skillsTitle }}</h2>
                 </div>
 
                 <div class="grid gap-6 md:grid-cols-2 lg:gap-8">
@@ -380,8 +508,8 @@
         <section id="projects" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-8 text-center" data-aos="fade-up" data-aos-duration="800">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">Projects</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">Selected work across products and systems</h2>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $projectsBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $projectsTitle }}</h2>
                 </div>
 
                 <div class="mb-8 flex flex-wrap justify-center gap-2" data-aos="fade-up" data-aos-duration="800" data-aos-delay="80">
@@ -421,8 +549,8 @@
         <section class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl" data-aos="fade-up" data-aos-duration="800">
                 <div class="mb-8 text-center">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">Featured</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">Highlighted projects</h2>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $featuredBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $featuredTitle }}</h2>
                 </div>
 
                 <div class="rounded-4xl border border-white/10 bg-base-100/70 p-3 shadow-2xl backdrop-blur-lg sm:p-4 lg:p-5">
@@ -484,8 +612,8 @@
             <div class="mx-auto max-w-7xl">
                 <div class="mb-8 flex flex-wrap items-center justify-between gap-3" data-aos="fade-up" data-aos-duration="800">
                     <div>
-                        <p class="text-sm uppercase tracking-[0.24em] text-info">Journal</p>
-                        <h2 class="mt-2 text-3xl font-semibold text-base-content sm:text-4xl">Latest notes and articles</h2>
+                        <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $journalBadge }}</p>
+                        <h2 class="mt-2 text-3xl font-semibold text-base-content sm:text-4xl">{{ $journalTitle }}</h2>
                     </div>
                     <a href="{{ route('journal.index') }}" class="btn btn-outline rounded-xl">View All</a>
                 </div>
@@ -526,24 +654,104 @@
             </div>
         </section>
 
-        <section id="experience" class="px-4 py-14 sm:px-8 sm:py-20">
+        <section class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
-                <div class="mb-12 text-center" data-aos="fade-up" data-aos-duration="800">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">Experience</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">Milestones from business to engineering</h2>
+                <div class="mb-10 text-center" data-aos="fade-up" data-aos-duration="800">
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $journeyBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $journeyTitle }}</h2>
                 </div>
 
-                <div class="relative mx-auto max-w-3xl">
-                    <span aria-hidden="true" class="absolute inset-y-2 left-4 w-px bg-white/15"></span>
-                    @foreach ($experiences as $experience)
-                        <article data-aos="fade-up" data-aos-duration="800" class="timeline-item relative mb-10 pl-12 last:mb-0 sm:pl-14">
-                            <span class="absolute left-4 top-1.5 inline-flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full border border-info/50 bg-base-100 shadow-[0_0_0_6px_rgba(30,41,59,0.6)]"></span>
-                            <p class="text-sm font-medium text-info">{{ $experience->year }}</p>
-                            <h3 class="mt-2 text-xl font-semibold text-base-content">{{ $experience->role }}</h3>
-                            <p class="mt-2 text-sm text-base-content/60">{{ $experience->company }}</p>
-                            <p class="mt-2 leading-relaxed text-base-content/75">{{ $experience->description }}</p>
-                        </article>
-                    @endforeach
+                <div class="grid gap-8 lg:grid-cols-2 lg:gap-10">
+                    <div id="education" data-aos="fade-up" data-aos-duration="800" class="space-y-6">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.2em] text-info">{{ $educationBadge }}</p>
+                            <h3 class="mt-2 text-2xl font-semibold text-base-content">{{ $educationTitle }}</h3>
+                        </div>
+
+                        <div class="relative">
+                            <span aria-hidden="true" class="absolute inset-y-2 left-2 hidden w-px bg-white/15 sm:block"></span>
+
+                            @forelse ($educations as $education)
+                                @php
+                                    $yearRange = $education->end_year
+                                        ? $education->start_year.' - '.$education->end_year
+                                        : $education->start_year.' - Present';
+                                @endphp
+                                <article data-aos="fade-up" data-aos-duration="800" class="group relative mb-6 last:mb-0 sm:pl-14">
+                                    <span aria-hidden="true" class="absolute left-2 top-10 hidden h-4 w-4 -translate-x-1/2 rounded-full border border-info/50 bg-base-100 shadow-[0_0_0_6px_rgba(30,41,59,0.6)] sm:inline-flex"></span>
+
+                                    <div class="skill-category-card isolate overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur-lg transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-info/20 sm:p-6">
+                                        <span aria-hidden="true" class="skill-card-spotlight"></span>
+                                        <div class="flex flex-wrap items-start justify-between gap-3">
+                                            <div class="inline-flex items-center gap-3">
+                                                @if ($education->logo)
+                                                    <img
+                                                        src="{{ $resolveAsset($education->logo, '') }}"
+                                                        alt="{{ $education->institution_name }} logo"
+                                                        class="h-12 w-12 rounded-xl border border-white/10 object-cover"
+                                                        loading="lazy"
+                                                    >
+                                                @else
+                                                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-base-100/60 text-info">
+                                                        <i data-lucide="graduation-cap" class="h-5 w-5"></i>
+                                                    </span>
+                                                @endif
+
+                                                <div>
+                                                    <p class="text-sm font-medium text-info">{{ $yearRange }}</p>
+                                                    <h3 class="mt-1 text-xl font-semibold text-base-content">{{ $education->institution_name }}</h3>
+                                                    <p class="mt-1 text-sm text-base-content/70">{{ $education->major }} • {{ $education->degree }}</p>
+                                                </div>
+                                            </div>
+
+                                            @if (! $education->end_year)
+                                                <span class="badge badge-info badge-outline rounded-full">Currently Studying</span>
+                                            @endif
+                                        </div>
+
+                                        @if ($education->description)
+                                            <p class="mt-4 leading-relaxed text-base-content/75">{{ $education->description }}</p>
+                                        @endif
+                                    </div>
+                                </article>
+                            @empty
+                                <article class="rounded-2xl border border-dashed border-white/20 bg-base-100/45 p-8 text-center">
+                                    <p class="text-lg font-semibold text-base-content">No education records yet</p>
+                                    <p class="mt-1 text-sm text-base-content/65">Tambahkan riwayat pendidikan dari admin CMS agar tampil di sini.</p>
+                                </article>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    <div id="experience" data-aos="fade-up" data-aos-duration="800" data-aos-delay="80" class="space-y-6">
+                        <div>
+                            <p class="text-xs uppercase tracking-[0.2em] text-info">{{ $experienceBadge }}</p>
+                            <h3 class="mt-2 text-2xl font-semibold text-base-content">{{ $experienceTitle }}</h3>
+                        </div>
+
+                        <div class="relative">
+                            <span aria-hidden="true" class="absolute inset-y-2 left-2 hidden w-px bg-white/15 sm:block"></span>
+
+                            @forelse ($experiences as $experience)
+                                <article data-aos="fade-up" data-aos-duration="800" class="group relative mb-6 last:mb-0 sm:pl-14">
+                                    <span aria-hidden="true" class="absolute left-2 top-7 hidden h-4 w-4 -translate-x-1/2 rounded-full border border-info/50 bg-base-100 shadow-[0_0_0_6px_rgba(30,41,59,0.6)] sm:inline-flex"></span>
+
+                                    <div class="skill-category-card isolate overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-5 shadow-xl backdrop-blur-lg transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-[1.02] group-hover:shadow-info/20 sm:p-6">
+                                        <span aria-hidden="true" class="skill-card-spotlight"></span>
+                                        <p class="text-sm font-medium text-info">{{ $experience->year }}</p>
+                                        <h3 class="mt-2 text-xl font-semibold text-base-content">{{ $experience->role }}</h3>
+                                        <p class="mt-2 text-sm text-base-content/60">{{ $experience->company }}</p>
+                                        <p class="mt-3 leading-relaxed text-base-content/75">{{ $experience->description }}</p>
+                                    </div>
+                                </article>
+                            @empty
+                                <article class="rounded-2xl border border-dashed border-white/20 bg-base-100/45 p-8 text-center">
+                                    <p class="text-lg font-semibold text-base-content">No experience records yet</p>
+                                    <p class="mt-1 text-sm text-base-content/65">Tambahkan pengalaman dari admin CMS agar tampil di sini.</p>
+                                </article>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -551,8 +759,8 @@
         <section id="services" class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl">
                 <div class="mb-10 text-center" data-aos="fade-up" data-aos-duration="800">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">Services</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">How I can help your business</h2>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $servicesBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $servicesTitle }}</h2>
                 </div>
 
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -575,8 +783,8 @@
         <section class="px-4 py-14 sm:px-8 sm:py-20">
             <div class="mx-auto max-w-7xl" data-aos="fade-up" data-aos-duration="800">
                 <div class="mb-8 text-center">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">Testimonials</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">What clients say</h2>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $testimonialsBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content sm:text-4xl">{{ $testimonialsTitle }}</h2>
                 </div>
 
                 <div class="rounded-4xl border border-white/10 bg-base-100/70 p-3 shadow-2xl backdrop-blur-lg sm:p-4 lg:p-5">
@@ -638,16 +846,27 @@
         <section id="contact" class="px-4 pb-16 pt-14 sm:px-8 sm:pb-24 sm:pt-20">
             <div class="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
                 <article data-aos="fade-up" data-aos-duration="800" class="portfolio-glass rounded-4xl border border-white/10 p-6 shadow-2xl sm:p-8">
-                    <p class="text-sm uppercase tracking-[0.24em] text-info">Contact</p>
-                    <h2 class="mt-3 text-3xl font-semibold text-base-content">Let's build something meaningful</h2>
-                    <p class="mt-4 text-base leading-relaxed text-base-content/75">Open for freelance and long-term collaboration. Reach out anytime and I will get back to you quickly.</p>
+                    <p class="text-sm uppercase tracking-[0.24em] text-info">{{ $contactBadge }}</p>
+                    <h2 class="mt-3 text-3xl font-semibold text-base-content">{{ $contactTitle }}</h2>
+                    <p class="mt-4 text-base leading-relaxed text-base-content/75">{{ $contactDescription }}</p>
 
                     <div class="mt-8 space-y-4">
                         @foreach ($contactLinks as $contact)
                             <a href="{{ $contact['href'] }}" target="_blank" rel="noreferrer" class="group flex items-center justify-between rounded-2xl border border-white/10 bg-base-100/50 px-4 py-3 transition hover:border-info/40 hover:bg-info/10">
                                 <div class="flex items-center gap-3">
+                                    @php($contactIcon = trim((string) ($contact['icon'] ?? 'link-2')))
                                     <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-info/20 text-info">
-                                        <i data-lucide="{{ $contact['icon'] }}" class="h-4 w-4"></i>
+                                        @if ($contactIcon === 'brand-linkedin')
+                                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 fill-current" role="img">
+                                                <path d="M20.45 20.45h-3.56v-5.58c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.15 1.45-2.15 2.94v5.68H9.33V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.23 0H1.77A1.76 1.76 0 0 0 0 1.74v20.52C0 23.23.79 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.74V1.74A1.76 1.76 0 0 0 22.23 0z" />
+                                            </svg>
+                                        @elseif ($contactIcon === 'brand-github' || $contactIcon === 'github')
+                                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 fill-current" role="img">
+                                                <path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.1.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.33-1.77-1.33-1.77-1.09-.74.08-.72.08-.72 1.2.09 1.84 1.23 1.84 1.23 1.07 1.84 2.8 1.31 3.49 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.46-1.33-5.46-5.92 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.6-2.8 5.61-5.47 5.91.43.37.82 1.1.82 2.22v3.29c0 .32.21.69.83.58A12 12 0 0 0 12 .5z" />
+                                            </svg>
+                                        @else
+                                            <i data-lucide="{{ $contactIcon !== '' ? $contactIcon : 'link-2' }}" class="h-4 w-4"></i>
+                                        @endif
                                     </span>
                                     <div>
                                         <p class="text-sm text-base-content/65">{{ $contact['label'] }}</p>
@@ -661,10 +880,10 @@
                 </article>
 
                 <article data-aos="fade-up" data-aos-duration="800" data-aos-delay="120" class="portfolio-glass rounded-4xl border border-white/10 p-6 shadow-2xl sm:p-8">
-                    <h3 class="text-2xl font-semibold text-base-content">Send a message</h3>
+                    <h3 class="text-2xl font-semibold text-base-content">{{ $contactFormTitle }}</h3>
                     <form id="contact-form" class="mt-6 space-y-4" novalidate>
                         <x-ui.input-field
-                            label="Name"
+                            :label="__('common.name')"
                             name="name"
                             type="text"
                             placeholder="Your name"
@@ -674,7 +893,7 @@
                         />
 
                         <x-ui.input-field
-                            label="Email"
+                            :label="__('common.email')"
                             name="email"
                             type="email"
                             placeholder="you@example.com"
@@ -684,7 +903,7 @@
                         />
 
                         <x-ui.textarea-field
-                            label="Message"
+                            :label="__('common.message')"
                             name="message"
                             :rows="5"
                             placeholder="Tell me about your project"
@@ -694,7 +913,7 @@
                         />
 
                         <button id="contact-submit" type="submit" class="btn btn-info w-full rounded-xl text-base-content">
-                            <span class="submit-label">Send Message</span>
+                            <span class="submit-label">{{ $contactSubmitText }}</span>
                             <span class="loading loading-spinner loading-sm hidden"></span>
                         </button>
                     </form>
@@ -713,8 +932,23 @@
 
             <div class="flex items-center gap-3">
                 @foreach ($footerSocials as $social)
+                    @php($socialIcon = trim((string) ($social['icon'] ?? 'link-2')))
                     <a href="{{ $social['link'] ?? '#' }}" target="_blank" rel="noreferrer" class="btn btn-circle btn-ghost" aria-label="{{ $social['label'] ?? 'Social' }}">
-                        <i data-lucide="arrow-up-right" class="h-4 w-4"></i>
+                        @if ($socialIcon === 'brand-linkedin')
+                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 fill-current" role="img">
+                                <path d="M20.45 20.45h-3.56v-5.58c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.15 1.45-2.15 2.94v5.68H9.33V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.55V9h3.57v11.45zM22.23 0H1.77A1.76 1.76 0 0 0 0 1.74v20.52C0 23.23.79 24 1.77 24h20.46c.98 0 1.77-.77 1.77-1.74V1.74A1.76 1.76 0 0 0 22.23 0z" />
+                            </svg>
+                        @elseif ($socialIcon === 'brand-x')
+                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 fill-current" role="img">
+                                <path d="M18.9 2H21l-6.53 7.46L22.2 22h-6.05l-4.74-6.2L5.94 22H3.84l6.98-7.97L2 2h6.2l4.28 5.66L18.9 2zm-1.06 18h1.67L7.28 3.9H5.48L17.84 20z" />
+                            </svg>
+                        @elseif ($socialIcon === 'brand-github' || $socialIcon === 'github')
+                            <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 fill-current" role="img">
+                                <path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.1.82-.26.82-.58v-2.04c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.33-1.77-1.33-1.77-1.09-.74.08-.72.08-.72 1.2.09 1.84 1.23 1.84 1.23 1.07 1.84 2.8 1.31 3.49 1 .11-.78.42-1.31.76-1.61-2.66-.3-5.46-1.33-5.46-5.92 0-1.31.47-2.38 1.23-3.22-.12-.3-.53-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.29-1.23 3.29-1.23.65 1.65.24 2.87.12 3.17.77.84 1.23 1.91 1.23 3.22 0 4.6-2.8 5.61-5.47 5.91.43.37.82 1.1.82 2.22v3.29c0 .32.21.69.83.58A12 12 0 0 0 12 .5z" />
+                            </svg>
+                        @else
+                            <i data-lucide="{{ $socialIcon !== '' ? $socialIcon : 'link-2' }}" class="h-4 w-4"></i>
+                        @endif
                     </a>
                 @endforeach
             </div>

@@ -14,19 +14,34 @@
         <p class="mt-1 text-sm text-base-content/60">Edit logo and CTA displayed on the landing page.</p>
 
         <form wire:submit="saveNavbar" class="mt-5 space-y-4">
+            <div class="tabs tabs-boxed inline-flex rounded-xl border border-base-content/10 bg-base-100/55 p-1">
+                <button type="button" wire:click="$set('editingLocale', 'id')" class="tab rounded-lg px-4 {{ $editingLocale === 'id' ? 'tab-active bg-info text-base-content' : '' }}">ID</button>
+                <button type="button" wire:click="$set('editingLocale', 'en')" class="tab rounded-lg px-4 {{ $editingLocale === 'en' ? 'tab-active bg-info text-base-content' : '' }}">EN</button>
+            </div>
+
             <x-ui.select-field label="Brand Display" name="brandMode" wire:model.live="brandMode" required>
                 <option value="text">Text only</option>
                 <option value="logo">Logo/Icon only</option>
                 <option value="combo">Logo/Icon + Text</option>
             </x-ui.select-field>
 
-            <x-ui.input-field
-                label="Logo Text"
-                name="logoText"
-                wire:model.defer="logoText"
-                placeholder="Wisnu.dev"
-                hint="Wajib jika mode menampilkan text (Text only / Combo)."
-            />
+            @if ($editingLocale === 'id')
+                <x-ui.input-field
+                    label="Logo Text (ID)"
+                    name="logoTextId"
+                    wire:model.defer="logoTextId"
+                    placeholder="Wisnu.dev"
+                    hint="Wajib jika mode menampilkan text (Text only / Combo)."
+                />
+            @else
+                <x-ui.input-field
+                    label="Logo Text (EN)"
+                    name="logoTextEn"
+                    wire:model.defer="logoTextEn"
+                    placeholder="Wisnu.dev"
+                    hint="Required when text mode is used (Text only / Combo)."
+                />
+            @endif
 
             <x-ui.select-field label="Logo Source" name="brandLogoType" wire:model.live="brandLogoType" required>
                 <option value="image">Image (PNG/JPG/WebP/SVG)</option>
@@ -73,7 +88,11 @@
                 @endif
             @endif
 
-            <x-ui.input-field label="CTA Text" name="ctaText" wire:model.defer="ctaText" required />
+            @if ($editingLocale === 'id')
+                <x-ui.input-field label="CTA Text (ID)" name="ctaTextId" wire:model.defer="ctaTextId" required />
+            @else
+                <x-ui.input-field label="CTA Text (EN)" name="ctaTextEn" wire:model.defer="ctaTextEn" required />
+            @endif
 
             <x-ui.input-field label="CTA Link" name="ctaLink" wire:model.defer="ctaLink" required />
 
@@ -91,7 +110,16 @@
         </div>
 
         <form wire:submit="saveMenuItem" class="mt-4 grid gap-3 md:grid-cols-2">
-            <x-ui.input-field label="Label" name="label" wire:model.defer="label" wrapperClass="md:col-span-2" required />
+            <div class="tabs tabs-boxed inline-flex rounded-xl border border-base-content/10 bg-base-100/55 p-1 md:col-span-2">
+                <button type="button" wire:click="$set('editingLocale', 'id')" class="tab rounded-lg px-4 {{ $editingLocale === 'id' ? 'tab-active bg-info text-base-content' : '' }}">ID</button>
+                <button type="button" wire:click="$set('editingLocale', 'en')" class="tab rounded-lg px-4 {{ $editingLocale === 'en' ? 'tab-active bg-info text-base-content' : '' }}">EN</button>
+            </div>
+
+            @if ($editingLocale === 'id')
+                <x-ui.input-field label="Label (ID)" name="labelId" wire:model.defer="labelId" wrapperClass="md:col-span-2" required />
+            @else
+                <x-ui.input-field label="Label (EN)" name="labelEn" wire:model.defer="labelEn" wrapperClass="md:col-span-2" required />
+            @endif
 
             <x-ui.input-field label="Href" name="href" wire:model.defer="href" wrapperClass="md:col-span-2" placeholder="#home" required />
 
@@ -116,7 +144,7 @@
         >
             @foreach ($menuItems as $item)
                 <tr wire:key="menu-item-{{ $item->id }}">
-                    <td>{{ $item->label }}</td>
+                    <td>{{ \App\Support\LocalizedContent::resolve($item->label, default: '-') }}</td>
                     <td>{{ $item->href }}</td>
                     <td>{{ $item->sort_order }}</td>
                     <td>

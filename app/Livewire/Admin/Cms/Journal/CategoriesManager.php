@@ -15,6 +15,8 @@ class CategoriesManager extends Component
 {
     use WithPagination;
 
+    public string $editingLocale = 'id';
+
     public string $search = '';
 
     public string $sortField = 'name';
@@ -27,9 +29,17 @@ class CategoriesManager extends Component
 
     public string $name = '';
 
+    public string $nameId = '';
+
+    public string $nameEn = '';
+
     public string $slug = '';
 
     public string $description = '';
+
+    public string $descriptionId = '';
+
+    public string $descriptionEn = '';
 
     protected bool $autoGenerateSlug = true;
 
@@ -50,8 +60,11 @@ class CategoriesManager extends Component
         $this->sortDirection = 'asc';
     }
 
-    public function updatedName(string $value): void
+    public function updatedNameId(string $value): void
     {
+        $this->nameId = $value;
+        $this->name = $value;
+
         if (! $this->autoGenerateSlug) {
             return;
         }
@@ -74,34 +87,47 @@ class CategoriesManager extends Component
     public function openEditModal(int $categoryId): void
     {
         $category = ArticleCategory::query()->findOrFail($categoryId);
+        $nameTranslations = \App\Support\LocalizedContent::split($category->name_translations ?? $category->name);
+        $descriptionTranslations = \App\Support\LocalizedContent::split($category->description_translations ?? ($category->description ?? ''));
 
         $this->categoryId = $category->id;
-        $this->name = $category->name;
+        $this->name = $nameTranslations['id'];
+        $this->nameId = $nameTranslations['id'];
+        $this->nameEn = $nameTranslations['en'];
         $this->slug = $category->slug;
-        $this->description = $category->description ?? '';
+        $this->description = $descriptionTranslations['id'];
+        $this->descriptionId = $descriptionTranslations['id'];
+        $this->descriptionEn = $descriptionTranslations['en'];
         $this->autoGenerateSlug = false;
         $this->showModal = true;
     }
 
     public function save(): void
     {
+        $this->name = trim($this->nameId) !== '' ? trim($this->nameId) : trim($this->nameEn);
+        $this->description = trim($this->descriptionId) !== '' ? trim($this->descriptionId) : trim($this->descriptionEn);
+
         $this->validate([
-            'name' => ['required', 'string', 'max:120'],
+            'nameId' => ['required', 'string', 'max:120'],
+            'nameEn' => ['required', 'string', 'max:120'],
             'slug' => [
                 'required',
                 'string',
                 'max:160',
                 Rule::unique('article_categories', 'slug')->ignore($this->categoryId),
             ],
-            'description' => ['nullable', 'string', 'max:500'],
+            'descriptionId' => ['nullable', 'string', 'max:500'],
+            'descriptionEn' => ['nullable', 'string', 'max:500'],
         ]);
 
         ArticleCategory::query()->updateOrCreate(
             ['id' => $this->categoryId],
             [
                 'name' => $this->name,
+                'name_translations' => \App\Support\LocalizedContent::pack($this->nameId, $this->nameEn),
                 'slug' => $this->slug,
                 'description' => $this->description !== '' ? $this->description : null,
+                'description_translations' => \App\Support\LocalizedContent::pack($this->descriptionId, $this->descriptionEn),
             ]
         );
 
@@ -141,8 +167,12 @@ class CategoriesManager extends Component
         $this->reset([
             'categoryId',
             'name',
+            'nameId',
+            'nameEn',
             'slug',
             'description',
+            'descriptionId',
+            'descriptionEn',
         ]);
 
         $this->autoGenerateSlug = true;

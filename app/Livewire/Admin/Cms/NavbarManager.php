@@ -14,7 +14,13 @@ class NavbarManager extends Component
 {
     use WithFileUploads;
 
+    public string $editingLocale = 'id';
+
     public string $logoText = 'Wisnu.dev';
+
+    public string $logoTextId = 'Wisnu.dev';
+
+    public string $logoTextEn = 'Wisnu.dev';
 
     public string $brandMode = 'text';
 
@@ -28,11 +34,19 @@ class NavbarManager extends Component
 
     public string $ctaText = 'Hire Me';
 
+    public string $ctaTextId = 'Hire Me';
+
+    public string $ctaTextEn = 'Hire Me';
+
     public string $ctaLink = '#contact';
 
     public ?int $menuItemId = null;
 
     public string $label = '';
+
+    public string $labelId = '';
+
+    public string $labelEn = '';
 
     public string $href = '';
 
@@ -47,8 +61,12 @@ class NavbarManager extends Component
         $navbar = PortfolioContent::get('navbar', []);
         $rawBrandMode = (string) ($navbar['brand_mode'] ?? 'text');
         $rawBrandLogoType = (string) ($navbar['brand_logo_type'] ?? 'image');
+        $logoText = \App\Support\LocalizedContent::split($navbar['logo_text'] ?? 'Wisnu.dev');
+        $ctaText = \App\Support\LocalizedContent::split($navbar['cta_text'] ?? 'Hire Me');
 
-        $this->logoText = (string) ($navbar['logo_text'] ?? 'Wisnu.dev');
+        $this->logoTextId = $logoText['id'];
+        $this->logoTextEn = $logoText['en'];
+        $this->logoText = $this->logoTextId;
         $this->brandMode = in_array($rawBrandMode, ['text', 'logo', 'combo'], true)
             ? $rawBrandMode
             : 'text';
@@ -57,19 +75,26 @@ class NavbarManager extends Component
             : 'image';
         $this->brandLogoIcon = (string) ($navbar['brand_logo_icon'] ?? 'sparkles');
         $this->existingBrandLogoImage = $navbar['brand_logo_image'] ?? null;
-        $this->ctaText = $navbar['cta_text'] ?? 'Hire Me';
+        $this->ctaTextId = $ctaText['id'];
+        $this->ctaTextEn = $ctaText['en'];
+        $this->ctaText = $this->ctaTextId;
         $this->ctaLink = $navbar['cta_link'] ?? '#contact';
     }
 
     public function saveNavbar(): void
     {
+        $this->logoText = trim($this->logoTextId) !== '' ? trim($this->logoTextId) : trim($this->logoTextEn);
+        $this->ctaText = trim($this->ctaTextId) !== '' ? trim($this->ctaTextId) : trim($this->ctaTextEn);
+
         $this->validate([
-            'logoText' => ['nullable', 'string', 'max:80'],
+            'logoTextId' => ['nullable', 'string', 'max:80'],
+            'logoTextEn' => ['nullable', 'string', 'max:80'],
             'brandMode' => ['required', 'in:text,logo,combo'],
             'brandLogoType' => ['required', 'in:image,icon'],
             'brandLogoIcon' => ['nullable', 'string', 'max:80'],
             'brandLogoImage' => ['nullable', 'image', 'max:10240', 'mimes:png,jpg,jpeg,webp,svg'],
-            'ctaText' => ['required', 'string', 'max:80'],
+            'ctaTextId' => ['required', 'string', 'max:80'],
+            'ctaTextEn' => ['required', 'string', 'max:80'],
             'ctaLink' => ['required', 'string', 'max:255'],
         ]);
 
@@ -103,12 +128,12 @@ class NavbarManager extends Component
         }
 
         PortfolioContent::set('navbar', [
-            'logo_text' => $normalizedLogoText,
+            'logo_text' => \App\Support\LocalizedContent::pack($this->logoTextId, $this->logoTextEn),
             'brand_mode' => $this->brandMode,
             'brand_logo_type' => $this->brandLogoType,
             'brand_logo_icon' => $normalizedLogoIcon,
             'brand_logo_image' => $logoImagePath,
-            'cta_text' => $this->ctaText,
+            'cta_text' => \App\Support\LocalizedContent::pack($this->ctaTextId, $this->ctaTextEn),
             'cta_link' => $this->ctaLink,
         ]);
 
@@ -129,9 +154,12 @@ class NavbarManager extends Component
     public function editMenuItem(int $menuItemId): void
     {
         $item = MenuItem::query()->findOrFail($menuItemId);
+        $label = \App\Support\LocalizedContent::split($item->label);
 
         $this->menuItemId = $item->id;
-        $this->label = $item->label;
+        $this->label = $label['id'];
+        $this->labelId = $label['id'];
+        $this->labelEn = $label['en'];
         $this->href = $item->href;
         $this->sortOrder = $item->sort_order;
         $this->isVisible = $item->is_visible;
@@ -139,8 +167,11 @@ class NavbarManager extends Component
 
     public function saveMenuItem(): void
     {
+        $this->label = trim($this->labelId) !== '' ? trim($this->labelId) : trim($this->labelEn);
+
         $this->validate([
-            'label' => ['required', 'string', 'max:60'],
+            'labelId' => ['required', 'string', 'max:60'],
+            'labelEn' => ['required', 'string', 'max:60'],
             'href' => ['required', 'string', 'max:255'],
             'sortOrder' => ['required', 'integer', 'min:0'],
             'isVisible' => ['required', 'boolean'],
@@ -149,7 +180,7 @@ class NavbarManager extends Component
         MenuItem::query()->updateOrCreate(
             ['id' => $this->menuItemId],
             [
-                'label' => $this->label,
+                'label' => json_encode(\App\Support\LocalizedContent::pack($this->labelId, $this->labelEn), JSON_UNESCAPED_UNICODE),
                 'href' => $this->href,
                 'sort_order' => $this->sortOrder,
                 'is_visible' => $this->isVisible,
@@ -180,7 +211,7 @@ class NavbarManager extends Component
 
     public function resetMenuForm(): void
     {
-        $this->reset(['menuItemId', 'label', 'href']);
+        $this->reset(['menuItemId', 'label', 'labelId', 'labelEn', 'href']);
         $this->sortOrder = 0;
         $this->isVisible = true;
         $this->resetValidation();

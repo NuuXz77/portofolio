@@ -13,10 +13,13 @@ class Article extends Model
         'category_id',
         'created_by',
         'title',
+        'title_translations',
         'slug',
         'thumbnail_path',
         'excerpt',
+        'excerpt_translations',
         'content',
+        'content_translations',
         'tags',
         'status',
         'visibility',
@@ -26,12 +29,19 @@ class Article extends Model
         'view_count',
         'access_token',
         'seo_title',
+        'seo_title_translations',
         'seo_description',
+        'seo_description_translations',
     ];
 
     protected $casts = [
         'tags' => 'array',
         'published_at' => 'datetime',
+        'title_translations' => 'array',
+        'excerpt_translations' => 'array',
+        'content_translations' => 'array',
+        'seo_title_translations' => 'array',
+        'seo_description_translations' => 'array',
     ];
 
     public function category(): BelongsTo

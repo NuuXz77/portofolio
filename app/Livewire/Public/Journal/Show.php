@@ -47,7 +47,7 @@ class Show extends Component
     public function mount(string $slug): void
     {
         $article = Article::query()
-            ->with('category:id,name,slug')
+            ->with('category:id,name,name_translations,slug')
             ->where('slug', $slug)
             ->firstOrFail();
 
@@ -76,7 +76,7 @@ class Show extends Component
         $this->isPrivatePreview = $article->visibility === 'private';
 
         $this->relatedArticles = Article::query()
-            ->with('category:id,name,slug')
+            ->with('category:id,name,name_translations,slug')
             ->publiclyVisible()
             ->where('id', '!=', $article->id)
             ->when($article->category_id, fn ($builder) => $builder->where('category_id', $article->category_id))
@@ -543,6 +543,7 @@ class Show extends Component
             'totalTopLevelComments' => $totalTopLevelComments,
             'hasMoreComments' => $totalTopLevelComments > $comments->count(),
             ...$navbarData,
-        ])->title(($this->article->seo_title ?: $this->article->title).' | '.$brandName);
+        ])->title((\App\Support\LocalizedContent::resolve($this->article->seo_title_translations ?? $this->article->seo_title)
+            ?: \App\Support\LocalizedContent::resolve($this->article->title_translations ?? $this->article->title)).' | '.$brandName);
     }
 }

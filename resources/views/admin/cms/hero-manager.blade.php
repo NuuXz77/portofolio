@@ -3,17 +3,26 @@
     <p class="mt-1 text-sm text-base-content/60">Manage headline, subheadline, roles, CTA buttons, and hero image.</p>
 
     <form wire:submit="save" class="mt-6 grid gap-4 lg:grid-cols-2">
-        <x-ui.input-field label="Headline" name="headline" wire:model.defer="headline" wrapperClass="lg:col-span-2" required />
+        <div class="tabs tabs-boxed inline-flex rounded-xl border border-base-content/10 bg-base-100/55 p-1 lg:col-span-2">
+            <button type="button" wire:click="$set('editingLocale', 'id')" class="tab rounded-lg px-4 {{ $editingLocale === 'id' ? 'tab-active bg-info text-base-content' : '' }}">ID</button>
+            <button type="button" wire:click="$set('editingLocale', 'en')" class="tab rounded-lg px-4 {{ $editingLocale === 'en' ? 'tab-active bg-info text-base-content' : '' }}">EN</button>
+        </div>
 
-        <x-ui.textarea-field label="Subheadline" name="subheadline" wire:model.defer="subheadline" :rows="3" wrapperClass="lg:col-span-2" required />
-
-        <x-ui.textarea-field label="Typing Roles (one per line)" name="rolesText" wire:model.defer="rolesText" :rows="4" wrapperClass="lg:col-span-2" required />
-
-        <x-ui.input-field label="Primary CTA Text" name="primaryCtaText" wire:model.defer="primaryCtaText" required />
+        @if ($editingLocale === 'id')
+            <x-ui.input-field label="Headline (ID)" name="headlineId" wire:model.defer="headlineId" wrapperClass="lg:col-span-2" required />
+            <x-ui.textarea-field label="Subheadline (ID)" name="subheadlineId" wire:model.defer="subheadlineId" :rows="3" wrapperClass="lg:col-span-2" required />
+            <x-ui.textarea-field label="Typing Roles (ID, one per line)" name="rolesTextId" wire:model.defer="rolesTextId" :rows="4" wrapperClass="lg:col-span-2" required />
+            <x-ui.input-field label="Primary CTA Text (ID)" name="primaryCtaTextId" wire:model.defer="primaryCtaTextId" required />
+            <x-ui.input-field label="Secondary CTA Text (ID)" name="secondaryCtaTextId" wire:model.defer="secondaryCtaTextId" required />
+        @else
+            <x-ui.input-field label="Headline (EN)" name="headlineEn" wire:model.defer="headlineEn" wrapperClass="lg:col-span-2" required />
+            <x-ui.textarea-field label="Subheadline (EN)" name="subheadlineEn" wire:model.defer="subheadlineEn" :rows="3" wrapperClass="lg:col-span-2" required />
+            <x-ui.textarea-field label="Typing Roles (EN, one per line)" name="rolesTextEn" wire:model.defer="rolesTextEn" :rows="4" wrapperClass="lg:col-span-2" required />
+            <x-ui.input-field label="Primary CTA Text (EN)" name="primaryCtaTextEn" wire:model.defer="primaryCtaTextEn" required />
+            <x-ui.input-field label="Secondary CTA Text (EN)" name="secondaryCtaTextEn" wire:model.defer="secondaryCtaTextEn" required />
+        @endif
 
         <x-ui.input-field label="Primary CTA Link" name="primaryCtaLink" wire:model.defer="primaryCtaLink" required />
-
-        <x-ui.input-field label="Secondary CTA Text" name="secondaryCtaText" wire:model.defer="secondaryCtaText" required />
 
         <x-ui.input-field label="Secondary CTA Link" name="secondaryCtaLink" wire:model.defer="secondaryCtaLink" required />
 

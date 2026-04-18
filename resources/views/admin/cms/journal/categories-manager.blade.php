@@ -51,9 +51,20 @@
 
     <x-ui.modal :open="$showModal" :title="$categoryId ? 'Edit Category' : 'Add Category'" closeAction="$set('showModal', false)">
         <form wire:submit="save" class="mt-4 grid gap-3">
-            <x-ui.input-field label="Name" name="name" wire:model.live="name" required />
+            <div class="tabs tabs-boxed inline-flex rounded-xl border border-base-content/10 bg-base-100/55 p-1">
+                <button type="button" wire:click="$set('editingLocale', 'id')" class="tab rounded-lg px-4 {{ $editingLocale === 'id' ? 'tab-active bg-info text-base-content' : '' }}">ID</button>
+                <button type="button" wire:click="$set('editingLocale', 'en')" class="tab rounded-lg px-4 {{ $editingLocale === 'en' ? 'tab-active bg-info text-base-content' : '' }}">EN</button>
+            </div>
+
+            @if ($editingLocale === 'id')
+                <x-ui.input-field label="Name (ID)" name="nameId" wire:model.live="nameId" required />
+                <x-ui.textarea-field label="Description (ID)" name="descriptionId" wire:model.defer="descriptionId" :rows="3" />
+            @else
+                <x-ui.input-field label="Name (EN)" name="nameEn" wire:model.defer="nameEn" required />
+                <x-ui.textarea-field label="Description (EN)" name="descriptionEn" wire:model.defer="descriptionEn" :rows="3" />
+            @endif
+
             <x-ui.input-field label="Slug" name="slug" wire:model.defer="slug" required />
-            <x-ui.textarea-field label="Description" name="description" wire:model.defer="description" :rows="3" />
 
             <div class="modal-action">
                 <button type="button" class="btn" wire:click="$set('showModal', false)">Cancel</button>

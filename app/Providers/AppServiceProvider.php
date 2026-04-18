@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
@@ -20,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        URL::defaults([
+            'locale' => app()->getLocale(),
+        ]);
+
         View::share('simpleIconsCdn', rtrim((string) config('services.simple_icons_cdn', 'https://cdn.simpleicons.org'), '/'));
     }
 }

@@ -47,7 +47,7 @@ class Index extends Component
         $navbarData = PublicNavbarData::forJournal();
 
         $articles = Article::query()
-            ->with('category:id,name,slug')
+            ->with('category:id,name,name_translations,slug')
             ->publiclyVisible()
             ->when($this->search !== '', function ($builder): void {
                 $builder->where(function ($nested): void {
@@ -79,6 +79,6 @@ class Index extends Component
             'search' => $this->search,
             'activeCategory' => $this->activeCategory,
             ...$navbarData,
-        ])->title('My Journal | '.$brandName);
+        ])->title(__('article.my_journal').' | '.$brandName);
     }
 }

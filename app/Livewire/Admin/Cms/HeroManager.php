@@ -14,17 +14,39 @@ class HeroManager extends Component
 {
     use WithFileUploads;
 
+    public string $editingLocale = 'id';
+
     public string $headline = '';
+
+    public string $headlineId = '';
+
+    public string $headlineEn = '';
 
     public string $subheadline = '';
 
+    public string $subheadlineId = '';
+
+    public string $subheadlineEn = '';
+
     public string $rolesText = '';
 
+    public string $rolesTextId = '';
+
+    public string $rolesTextEn = '';
+
     public string $primaryCtaText = '';
+
+    public string $primaryCtaTextId = '';
+
+    public string $primaryCtaTextEn = '';
 
     public string $primaryCtaLink = '';
 
     public string $secondaryCtaText = '';
+
+    public string $secondaryCtaTextId = '';
+
+    public string $secondaryCtaTextEn = '';
 
     public string $secondaryCtaLink = '';
 
@@ -42,12 +64,36 @@ class HeroManager extends Component
     {
         $hero = PortfolioContent::get('hero', []);
 
-        $this->headline = $hero['headline'] ?? '';
-        $this->subheadline = $hero['subheadline'] ?? '';
-        $this->rolesText = implode(PHP_EOL, $hero['roles'] ?? []);
-        $this->primaryCtaText = $hero['primary_cta_text'] ?? '';
+        $headline = \App\Support\LocalizedContent::split($hero['headline'] ?? '');
+        $subheadline = \App\Support\LocalizedContent::split($hero['subheadline'] ?? '');
+        $primaryCtaText = \App\Support\LocalizedContent::split($hero['primary_cta_text'] ?? '');
+        $secondaryCtaText = \App\Support\LocalizedContent::split($hero['secondary_cta_text'] ?? '');
+        $roles = $hero['roles'] ?? [];
+
+        if (is_array($roles) && (array_key_exists('id', $roles) || array_key_exists('en', $roles))) {
+            $rolesId = is_array($roles['id'] ?? null) ? (array) ($roles['id'] ?? []) : [];
+            $rolesEn = is_array($roles['en'] ?? null) ? (array) ($roles['en'] ?? []) : [];
+        } else {
+            $rolesId = is_array($roles) ? $roles : [];
+            $rolesEn = is_array($roles) ? $roles : [];
+        }
+
+        $this->headlineId = $headline['id'];
+        $this->headlineEn = $headline['en'];
+        $this->headline = $this->headlineId;
+        $this->subheadlineId = $subheadline['id'];
+        $this->subheadlineEn = $subheadline['en'];
+        $this->subheadline = $this->subheadlineId;
+        $this->rolesTextId = implode(PHP_EOL, $rolesId);
+        $this->rolesTextEn = implode(PHP_EOL, $rolesEn);
+        $this->rolesText = $this->rolesTextId;
+        $this->primaryCtaTextId = $primaryCtaText['id'];
+        $this->primaryCtaTextEn = $primaryCtaText['en'];
+        $this->primaryCtaText = $this->primaryCtaTextId;
         $this->primaryCtaLink = $hero['primary_cta_link'] ?? '#projects';
-        $this->secondaryCtaText = $hero['secondary_cta_text'] ?? '';
+        $this->secondaryCtaTextId = $secondaryCtaText['id'];
+        $this->secondaryCtaTextEn = $secondaryCtaText['en'];
+        $this->secondaryCtaText = $this->secondaryCtaTextId;
         $this->secondaryCtaLink = $hero['secondary_cta_link'] ?? '#';
         $this->existingImage = $hero['image'] ?? null;
         $this->existingSecondaryCtaFile = $hero['secondary_cta_file'] ?? null;
@@ -55,13 +101,24 @@ class HeroManager extends Component
 
     public function save(): void
     {
+        $this->headline = trim($this->headlineId) !== '' ? trim($this->headlineId) : trim($this->headlineEn);
+        $this->subheadline = trim($this->subheadlineId) !== '' ? trim($this->subheadlineId) : trim($this->subheadlineEn);
+        $this->primaryCtaText = trim($this->primaryCtaTextId) !== '' ? trim($this->primaryCtaTextId) : trim($this->primaryCtaTextEn);
+        $this->secondaryCtaText = trim($this->secondaryCtaTextId) !== '' ? trim($this->secondaryCtaTextId) : trim($this->secondaryCtaTextEn);
+        $this->rolesText = trim($this->rolesTextId) !== '' ? trim($this->rolesTextId) : trim($this->rolesTextEn);
+
         $this->validate([
-            'headline' => ['required', 'string', 'max:180'],
-            'subheadline' => ['required', 'string', 'max:500'],
-            'rolesText' => ['required', 'string', 'max:500'],
-            'primaryCtaText' => ['required', 'string', 'max:80'],
+            'headlineId' => ['required', 'string', 'max:180'],
+            'headlineEn' => ['required', 'string', 'max:180'],
+            'subheadlineId' => ['required', 'string', 'max:500'],
+            'subheadlineEn' => ['required', 'string', 'max:500'],
+            'rolesTextId' => ['required', 'string', 'max:500'],
+            'rolesTextEn' => ['required', 'string', 'max:500'],
+            'primaryCtaTextId' => ['required', 'string', 'max:80'],
+            'primaryCtaTextEn' => ['required', 'string', 'max:80'],
             'primaryCtaLink' => ['required', 'string', 'max:255'],
-            'secondaryCtaText' => ['required', 'string', 'max:80'],
+            'secondaryCtaTextId' => ['required', 'string', 'max:80'],
+            'secondaryCtaTextEn' => ['required', 'string', 'max:80'],
             'secondaryCtaLink' => ['required', 'string', 'max:255'],
             'heroImage' => ['nullable', 'image', 'max:10240'],
             'secondaryCtaFile' => ['nullable', 'file', 'max:10240', 'mimes:pdf,doc,docx'],
@@ -86,19 +143,28 @@ class HeroManager extends Component
             );
         }
 
-        $roles = collect(preg_split('/\r\n|\r|\n/', $this->rolesText))
+        $rolesId = collect(preg_split('/\r\n|\r|\n/', $this->rolesTextId))
+            ->map(fn (string $item) => trim($item))
+            ->filter()
+            ->values()
+            ->all();
+
+        $rolesEn = collect(preg_split('/\r\n|\r|\n/', $this->rolesTextEn))
             ->map(fn (string $item) => trim($item))
             ->filter()
             ->values()
             ->all();
 
         PortfolioContent::set('hero', [
-            'headline' => $this->headline,
-            'subheadline' => $this->subheadline,
-            'roles' => $roles,
-            'primary_cta_text' => $this->primaryCtaText,
+            'headline' => \App\Support\LocalizedContent::pack($this->headlineId, $this->headlineEn),
+            'subheadline' => \App\Support\LocalizedContent::pack($this->subheadlineId, $this->subheadlineEn),
+            'roles' => [
+                'id' => $rolesId,
+                'en' => $rolesEn,
+            ],
+            'primary_cta_text' => \App\Support\LocalizedContent::pack($this->primaryCtaTextId, $this->primaryCtaTextEn),
             'primary_cta_link' => $this->primaryCtaLink,
-            'secondary_cta_text' => $this->secondaryCtaText,
+            'secondary_cta_text' => \App\Support\LocalizedContent::pack($this->secondaryCtaTextId, $this->secondaryCtaTextEn),
             'secondary_cta_link' => $this->secondaryCtaLink,
             'secondary_cta_file' => $secondaryCtaFilePath,
             'image' => $image,

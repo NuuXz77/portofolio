@@ -334,5 +334,8 @@ class DatabaseSeeder extends Seeder
                 $testimonial + ['is_visible' => true]
             );
         }
+
+        // Keep multilingual CMS defaults aligned with the latest dynamic schema.
+        $this->call(PortfolioCmsI18nSeeder::class);
     }
 }

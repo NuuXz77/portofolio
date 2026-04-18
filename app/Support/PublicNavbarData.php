@@ -25,7 +25,7 @@ class PublicNavbarData
             : 'image';
 
         return [
-            'logoText' => trim((string) ($navbar['logo_text'] ?? 'Wisnu.dev')),
+            'logoText' => LocalizedContent::resolve($navbar['logo_text'] ?? 'Wisnu.dev', default: 'Wisnu.dev'),
             'brandMode' => $brandMode,
             'brandLogoType' => $brandLogoType,
             'brandLogoImage' => isset($navbar['brand_logo_image']) ? trim((string) $navbar['brand_logo_image']) : null,
@@ -56,14 +56,17 @@ class PublicNavbarData
         $journalUrl = route('journal.index');
 
         $navItems = $menuItems->isNotEmpty()
-            ? $menuItems->map(fn ($item) => ['href' => (string) $item->href, 'label' => (string) $item->label])->all()
+            ? $menuItems->map(fn ($item) => [
+                'href' => (string) $item->href,
+                'label' => LocalizedContent::resolve($item->label, default: __('navigation.home')),
+            ])->all()
             : [
-                ['href' => '#home', 'label' => 'Home'],
-                ['href' => '#about', 'label' => 'About'],
-                ['href' => '#skills', 'label' => 'Skills'],
-                ['href' => '#projects', 'label' => 'Projects'],
-                ['href' => '#experience', 'label' => 'Experience'],
-                ['href' => '#contact', 'label' => 'Contact'],
+                ['href' => '#home', 'label' => __('navigation.home')],
+                ['href' => '#about', 'label' => __('navigation.about')],
+                ['href' => '#skills', 'label' => __('navigation.skills')],
+                ['href' => '#projects', 'label' => __('navigation.projects')],
+                ['href' => '#experience', 'label' => __('navigation.experience')],
+                ['href' => '#contact', 'label' => __('navigation.contact')],
             ];
 
         $navItems = collect($navItems)
@@ -105,7 +108,7 @@ class PublicNavbarData
 
         $navItems->push([
             'href' => $journalUrl,
-            'label' => 'Journal',
+            'label' => __('navigation.journal'),
         ]);
 
         $ctaLinkRaw = trim((string) ($navbar['cta_link'] ?? '#contact'));
@@ -117,7 +120,7 @@ class PublicNavbarData
         return [
             ...$brandConfig,
             'navItems' => $navItems->all(),
-            'ctaText' => (string) ($navbar['cta_text'] ?? 'Hire Me'),
+            'ctaText' => LocalizedContent::resolve($navbar['cta_text'] ?? __('navigation.hire_me'), default: __('navigation.hire_me')),
             'ctaLink' => $ctaLinkRaw !== '' ? $ctaLinkRaw : $homeUrl,
         ];
     }

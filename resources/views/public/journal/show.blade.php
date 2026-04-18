@@ -1,4 +1,6 @@
 @php
+    $localeText = static fn (mixed $value, string $default = ''): string => \App\Support\LocalizedContent::resolve($value, default: $default);
+
     $resolveAsset = function (?string $path, string $fallback = ''): string {
         if (! $path) {
             return $fallback;
@@ -11,10 +13,15 @@
         return \Illuminate\Support\Facades\Storage::url($path);
     };
 
+    $articleTitle = $localeText($article->title_translations ?? $article->title, $article->title);
+    $articleExcerpt = $localeText($article->excerpt_translations ?? $article->excerpt, $article->excerpt ?? '');
+    $articleContent = $localeText($article->content_translations ?? $article->content, $article->content);
+    $articleCategoryName = $localeText($article->category?->name_translations ?? $article->category?->name ?? __('article.general'), __('article.general'));
+
     $shareUrl = route('journal.show', $article->slug);
     $shareUrlEncoded = urlencode($shareUrl);
-    $shareWhatsappTextEncoded = urlencode($article->title.' - '.$shareUrl);
-    $shareTwitterTextEncoded = urlencode($article->title);
+    $shareWhatsappTextEncoded = urlencode($articleTitle.' - '.$shareUrl);
+    $shareTwitterTextEncoded = urlencode($articleTitle);
 
     $logoText = (string) ($logoText ?? 'Wisnu.dev');
     $brandMode = in_array(($brandMode ?? 'text'), ['text', 'logo', 'combo'], true)
@@ -26,7 +33,7 @@
     $brandLogoImage = isset($brandLogoImage) ? trim((string) $brandLogoImage) : null;
     $brandLogoIcon = trim((string) ($brandLogoIcon ?? 'sparkles'));
     $navItems = is_array($navItems ?? null) ? $navItems : [];
-    $ctaText = (string) ($ctaText ?? 'Hire Me');
+    $ctaText = (string) ($ctaText ?? __('navigation.hire_me'));
     $ctaLink = (string) ($ctaLink ?? route('home').'#contact');
 
     $likedCommentLookup = [];
@@ -67,26 +74,26 @@
             <img
                 loading="eager"
                 src="{{ $resolveAsset($article->thumbnail_path, 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=1600&q=80') }}"
-                alt="{{ $article->title }} cover"
+                alt="{{ $articleTitle }} cover"
                 class="h-64 w-full rounded-3xl border border-white/10 object-cover shadow-2xl sm:h-80"
             >
 
             <div class="mt-8">
                 <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60">
                     @if ($isPrivatePreview)
-                        <span class="badge badge-warning badge-outline rounded-full">Private Preview</span>
+                        <span class="badge badge-warning badge-outline rounded-full">{{ __('article.private_preview') }}</span>
                     @endif
-                    <span class="badge badge-outline badge-info rounded-full">{{ $article->category?->name ?? 'General' }}</span>
+                    <span class="badge badge-outline badge-info rounded-full">{{ $articleCategoryName }}</span>
                     <span>{{ optional($article->published_at ?: $article->created_at)->format('d M Y') }}</span>
                     <span>•</span>
-                    <span>{{ $article->author_name ?: 'Admin' }}</span>
+                    <span>{{ $article->author_name ?: __('article.author_fallback') }}</span>
                     <span>•</span>
-                    <span>{{ $article->read_time ?? 1 }} min read</span>
+                    <span>{{ $article->read_time ?? 1 }} {{ __('article.min_read') }}</span>
                     <span>•</span>
                     <span>{{ number_format($article->view_count) }} views</span>
                 </div>
 
-                <h1 class="mt-4 text-3xl font-semibold leading-tight text-base-content sm:text-4xl">{{ $article->title }}</h1>
+                <h1 class="mt-4 text-3xl font-semibold leading-tight text-base-content sm:text-4xl">{{ $articleTitle }}</h1>
 
                 @if (! empty($article->tags))
                     <div class="mt-4 flex flex-wrap gap-2">
@@ -98,14 +105,14 @@
 
                 <div class="mt-8 rounded-2xl border border-white/10 bg-base-100/60 p-5 shadow-xl">
                     <div class="journal-content prose prose-invert max-w-none leading-relaxed text-base-content/85">
-                        {!! $article->content !!}
+                        {!! $articleContent !!}
                     </div>
                 </div>
 
                 <section class="mt-8 grid gap-4 rounded-2xl border border-white/10 bg-base-100/60 p-4 shadow-xl sm:grid-cols-[1fr_auto] sm:items-center sm:p-5">
                     <div>
-                        <p class="text-sm font-semibold text-base-content">Share this article</p>
-                        <p class="mt-1 text-xs text-base-content/65">Bagikan ke temanmu atau simpan link untuk dibaca nanti.</p>
+                        <p class="text-sm font-semibold text-base-content">{{ __('article.share_this_article') }}</p>
+                        <p class="mt-1 text-xs text-base-content/65">{{ __('article.share_subtitle') }}</p>
                         <div class="mt-3 flex flex-wrap items-center gap-2">
                             <button
                                 type="button"
@@ -114,7 +121,7 @@
                                 data-share-url="{{ $shareUrl }}"
                             >
                                 <i data-lucide="link" class="h-4 w-4"></i>
-                                Copy Link
+                                {{ __('common.copy_link') }}
                             </button>
 
                             <a href="https://wa.me/?text={{ $shareWhatsappTextEncoded }}" target="_blank" rel="noreferrer" class="btn btn-outline btn-sm rounded-xl">
@@ -144,21 +151,21 @@
                         class="journal-like-btn btn rounded-2xl px-5 {{ $articleLikedByMe ? 'is-active btn-info' : 'btn-outline' }}"
                     >
                         <i data-lucide="heart" class="h-4 w-4"></i>
-                        <span>{{ number_format($articleLikesCount) }} likes</span>
+                        <span>{{ number_format($articleLikesCount) }} {{ __('article.likes') }}</span>
                     </button>
                 </section>
 
                 <section id="comments" class="mt-8 rounded-2xl border border-white/10 bg-base-100/60 p-4 shadow-xl sm:p-5">
                     <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-                        <h2 class="text-xl font-semibold text-base-content sm:text-2xl">Discussion</h2>
-                        <span class="badge badge-outline badge-info rounded-full">{{ number_format($totalCommentsCount) }} comments</span>
+                        <h2 class="text-xl font-semibold text-base-content sm:text-2xl">{{ __('article.discussion') }}</h2>
+                        <span class="badge badge-outline badge-info rounded-full">{{ number_format($totalCommentsCount) }} {{ __('article.comments') }}</span>
                     </div>
 
                     <form wire:submit="postComment" class="space-y-3">
                         <div class="grid gap-3 sm:grid-cols-2">
                             <label class="form-control">
                                 <span class="label">
-                                    <span class="label-text text-xs text-base-content/65">Name</span>
+                                    <span class="label-text text-xs text-base-content/65">{{ __('common.name') }}</span>
                                 </span>
                                 <input
                                     type="text"
@@ -170,7 +177,7 @@
 
                             <label class="form-control">
                                 <span class="label">
-                                    <span class="label-text text-xs text-base-content/65">Email (optional)</span>
+                                    <span class="label-text text-xs text-base-content/65">{{ __('article.email_optional') }}</span>
                                 </span>
                                 <input
                                     type="email"
@@ -183,13 +190,13 @@
 
                         <label class="form-control">
                             <span class="label">
-                                <span class="label-text text-xs text-base-content/65">Comment</span>
+                                    <span class="label-text text-xs text-base-content/65">{{ __('article.comments') }}</span>
                             </span>
                             <textarea
                                 wire:model.defer="commentBody"
                                 rows="4"
                                 class="textarea textarea-bordered w-full rounded-xl border-white/15 bg-base-100/70"
-                                placeholder="Write your thoughts..."
+                                    placeholder="{{ __('article.comment_placeholder') }}"
                             ></textarea>
                         </label>
 
@@ -204,9 +211,9 @@
                         @enderror
 
                         <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                            <p class="text-xs text-base-content/60">Tanpa login. Komentar milikmu dikenali dari browser ini.</p>
+                            <p class="text-xs text-base-content/60">{{ __('article.comment_hint') }}</p>
                             <button type="submit" class="btn btn-info rounded-xl" wire:loading.attr="disabled" wire:target="postComment">
-                                <span wire:loading.remove wire:target="postComment">Post Comment</span>
+                                <span wire:loading.remove wire:target="postComment">{{ __('article.post_comment') }}</span>
                                 <span wire:loading wire:target="postComment" class="loading loading-spinner loading-sm"></span>
                             </button>
                         </div>
@@ -216,8 +223,8 @@
                 <section class="mt-6 space-y-4" aria-live="polite">
                     @if ($comments->isEmpty())
                         <article class="rounded-2xl border border-dashed border-white/20 bg-base-100/45 p-8 text-center">
-                            <p class="text-base font-semibold text-base-content">Belum ada komentar</p>
-                            <p class="mt-1 text-sm text-base-content/65">Jadilah orang pertama yang memulai diskusi.</p>
+                            <p class="text-base font-semibold text-base-content">{{ __('article.no_comments') }}</p>
+                            <p class="mt-1 text-sm text-base-content/65">{{ __('article.be_first_comment') }}</p>
                         </article>
                     @else
                         @foreach ($comments as $comment)
@@ -236,7 +243,7 @@
                                     wire:click="loadMoreComments"
                                     class="btn btn-outline rounded-xl"
                                 >
-                                    Load more comments
+                                    {{ __('article.load_more_comments') }}
                                 </button>
                             </div>
                         @endif
@@ -248,8 +255,8 @@
         @if ($relatedArticles->isNotEmpty())
             <section class="mx-auto mt-14 max-w-7xl">
                 <div class="mb-5 flex items-center justify-between">
-                    <h2 class="text-2xl font-semibold text-base-content">Related Articles</h2>
-                    <a href="{{ route('journal.index') }}" wire:navigate class="btn btn-outline btn-sm rounded-xl">View All</a>
+                    <h2 class="text-2xl font-semibold text-base-content">{{ __('article.related_articles') }}</h2>
+                    <a href="{{ route('journal.index') }}" wire:navigate class="btn btn-outline btn-sm rounded-xl">{{ __('common.view_all') }}</a>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-3">
@@ -257,10 +264,15 @@
                         <article class="skill-category-card rounded-2xl border border-white/10 bg-white/5 p-4 shadow-lg backdrop-blur-lg">
                             <span aria-hidden="true" class="skill-card-spotlight"></span>
                             <p class="text-xs text-base-content/60">{{ optional($related->published_at ?: $related->created_at)->format('d M Y') }}</p>
+                            @php
+                                $relatedTitle = $localeText($related->title_translations ?? $related->title, $related->title);
+                                $relatedContent = $localeText($related->content_translations ?? $related->content, $related->content);
+                                $relatedExcerpt = $localeText($related->excerpt_translations ?? $related->excerpt, $related->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($relatedContent), 90));
+                            @endphp
                             <h3 class="mt-2 line-clamp-2 text-lg font-semibold text-base-content">
-                                <a href="{{ route('journal.show', $related->slug) }}" wire:navigate class="hover:text-info">{{ $related->title }}</a>
+                                <a href="{{ route('journal.show', $related->slug) }}" wire:navigate class="hover:text-info">{{ $relatedTitle }}</a>
                             </h3>
-                            <p class="mt-2 line-clamp-2 text-sm text-base-content/70">{{ $related->excerpt ?: \Illuminate\Support\Str::limit(strip_tags($related->content), 90) }}</p>
+                            <p class="mt-2 line-clamp-2 text-sm text-base-content/70">{{ $relatedExcerpt }}</p>
                         </article>
                     @endforeach
                 </div>

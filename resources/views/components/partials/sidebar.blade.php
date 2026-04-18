@@ -7,6 +7,7 @@
         ['route' => 'admin.portfolio.categories', 'active' => ['admin.portfolio.categories'], 'label' => 'Portfolio Categories', 'icon' => 'folder-tree'],
         ['route' => 'admin.skills', 'active' => ['admin.skills'], 'label' => 'Skills Management', 'icon' => 'cpu'],
         ['route' => 'admin.projects', 'active' => ['admin.projects'], 'label' => 'Projects Management', 'icon' => 'folder'],
+        ['route' => 'admin.educations', 'active' => ['admin.educations'], 'label' => 'Education Management', 'icon' => 'graduation-cap'],
         ['route' => 'admin.experiences', 'active' => ['admin.experiences'], 'label' => 'Experience Management', 'icon' => 'clock'],
         ['route' => 'admin.services', 'active' => ['admin.services'], 'label' => 'Services Management', 'icon' => 'briefcase'],
         ['route' => 'admin.testimonials', 'active' => ['admin.testimonials'], 'label' => 'Testimonials', 'icon' => 'message-square'],

@@ -9,22 +9,24 @@
     @php
         $seo = \App\Support\PortfolioContent::get('seo', []);
         $navbar = \App\Support\PortfolioContent::get('navbar', []);
-        $brandName = trim((string) ($navbar['logo_text'] ?? 'Wisnu.dev'));
+        $brandName = trim((string) \App\Support\LocalizedContent::resolve($navbar['logo_text'] ?? 'Wisnu.dev', default: 'Wisnu.dev'));
 
         if ($brandName === '') {
             $brandName = 'Wisnu.dev';
         }
 
-        $seoTitle = trim((string) ($seo['title'] ?? ''));
+        $seoTitle = trim((string) \App\Support\LocalizedContent::resolve($seo['title'] ?? '', default: ''));
         $isSeedSeoTitle = strcasecmp($seoTitle, 'Wisnu.dev | Fullstack Web Developer') === 0;
 
         $defaultTitle = $seoTitle !== '' && !$isSeedSeoTitle ? $seoTitle : $brandName . ' | Fullstack Web Developer';
-        $defaultDescription =
-            (string) ($seo['description'] ??
-                'Premium personal portfolio of a Fullstack Web Developer focused on scalable web apps, API development, and DevOps deployment.');
-        $defaultKeywords =
-            (string) ($seo['keywords'] ??
-                'fullstack developer, laravel developer, nextjs developer, devops engineer, portfolio');
+        $defaultDescription = trim((string) \App\Support\LocalizedContent::resolve(
+            $seo['description'] ?? null,
+            default: 'Premium personal portfolio of a Fullstack Web Developer focused on scalable web apps, API development, and DevOps deployment.'
+        ));
+        $defaultKeywords = trim((string) \App\Support\LocalizedContent::resolve(
+            $seo['keywords'] ?? null,
+            default: 'fullstack developer, laravel developer, nextjs developer, devops engineer, portfolio'
+        ));
         $defaultAuthor = $brandName;
 
         $metaTitle = trim((string) ($title ?? $defaultTitle));

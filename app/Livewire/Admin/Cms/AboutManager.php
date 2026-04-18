@@ -13,11 +13,25 @@ class AboutManager extends Component
 {
     use WithFileUploads;
 
+    public string $editingLocale = 'id';
+
     public string $title = '';
+
+    public string $titleId = '';
+
+    public string $titleEn = '';
 
     public string $description = '';
 
+    public string $descriptionId = '';
+
+    public string $descriptionEn = '';
+
     public string $statsText = '';
+
+    public string $statsTextId = '';
+
+    public string $statsTextEn = '';
 
     public ?string $existingImage = null;
 
@@ -28,15 +42,35 @@ class AboutManager extends Component
     public function mount(): void
     {
         $about = PortfolioContent::get('about', []);
+        $title = \App\Support\LocalizedContent::split($about['title'] ?? '');
+        $description = \App\Support\LocalizedContent::split($about['description'] ?? '');
         $stats = $about['stats'] ?? [];
 
-        $this->title = $about['title'] ?? '';
-        $this->description = $about['description'] ?? '';
+        $this->titleId = $title['id'];
+        $this->titleEn = $title['en'];
+        $this->title = $this->titleId;
+        $this->descriptionId = $description['id'];
+        $this->descriptionEn = $description['en'];
+        $this->description = $this->descriptionId;
         $this->existingImage = $about['profile_image'] ?? $about['image'] ?? null;
 
-        $this->statsText = collect($stats)
-            ->map(fn (array $stat) => trim((string) ($stat['label'] ?? '')).' | '.trim((string) ($stat['value'] ?? '')))
+        if (is_array($stats) && (array_key_exists('id', $stats) || array_key_exists('en', $stats))) {
+            $statsId = is_array($stats['id'] ?? null) ? (array) ($stats['id'] ?? []) : [];
+            $statsEn = is_array($stats['en'] ?? null) ? (array) ($stats['en'] ?? []) : [];
+        } else {
+            $statsId = is_array($stats) ? $stats : [];
+            $statsEn = is_array($stats) ? $stats : [];
+        }
+
+        $this->statsTextId = collect($statsId)
+            ->map(fn (array $stat) => trim((string) \App\Support\LocalizedContent::resolve($stat['label'] ?? '', 'id')).' | '.trim((string) \App\Support\LocalizedContent::resolve($stat['value'] ?? '', 'id')))
             ->implode(PHP_EOL);
+
+        $this->statsTextEn = collect($statsEn)
+            ->map(fn (array $stat) => trim((string) \App\Support\LocalizedContent::resolve($stat['label'] ?? '', 'en')).' | '.trim((string) \App\Support\LocalizedContent::resolve($stat['value'] ?? '', 'en')))
+            ->implode(PHP_EOL);
+
+        $this->statsText = $this->statsTextId;
     }
 
     /**
@@ -92,10 +126,17 @@ class AboutManager extends Component
 
     public function save(): void
     {
+        $this->title = trim($this->titleId) !== '' ? trim($this->titleId) : trim($this->titleEn);
+        $this->description = trim($this->descriptionId) !== '' ? trim($this->descriptionId) : trim($this->descriptionEn);
+        $this->statsText = trim($this->statsTextId) !== '' ? trim($this->statsTextId) : trim($this->statsTextEn);
+
         $this->validate([
-            'title' => ['required', 'string', 'max:180'],
-            'description' => ['required', 'string', 'max:6000'],
-            'statsText' => ['required', 'string', 'max:1200'],
+            'titleId' => ['required', 'string', 'max:180'],
+            'titleEn' => ['required', 'string', 'max:180'],
+            'descriptionId' => ['required', 'string', 'max:6000'],
+            'descriptionEn' => ['required', 'string', 'max:6000'],
+            'statsTextId' => ['required', 'string', 'max:2000'],
+            'statsTextEn' => ['required', 'string', 'max:2000'],
             'profileImage' => ['nullable', 'image', 'max:10240'],
         ]);
 
@@ -105,25 +146,33 @@ class AboutManager extends Component
             $image = $this->profileImage->store('portfolio/about', 'public');
         }
 
-        [$stats, $invalidLines] = $this->parseStatsLines($this->statsText);
+        [$statsId, $invalidLinesId] = $this->parseStatsLines($this->statsTextId);
+        [$statsEn, $invalidLinesEn] = $this->parseStatsLines($this->statsTextEn);
+
+        $invalidLines = array_values(array_unique([...$invalidLinesId, ...$invalidLinesEn]));
 
         if ($invalidLines !== []) {
             $lineInfo = implode(', ', $invalidLines);
-            $this->addError('statsText', "Format stats tidak valid pada baris: {$lineInfo}. Gunakan Label | Value (atau Label:Value / Label - Value).");
+            $this->addError('statsTextId', "Format stats tidak valid pada baris: {$lineInfo}. Gunakan Label | Value (atau Label:Value / Label - Value).");
+            $this->addError('statsTextEn', "Stats format is invalid on line(s): {$lineInfo}. Use Label | Value (or Label:Value / Label - Value).");
 
             return;
         }
 
-        if ($stats === []) {
-            $this->addError('statsText', 'Isi minimal 1 baris stats dengan format Label | Value.');
+        if ($statsId === [] || $statsEn === []) {
+            $this->addError('statsTextId', 'Isi minimal 1 baris stats (ID) dengan format Label | Value.');
+            $this->addError('statsTextEn', 'Fill at least 1 stats line (EN) with Label | Value format.');
 
             return;
         }
 
         PortfolioContent::set('about', [
-            'title' => $this->title,
-            'description' => $this->description,
-            'stats' => $stats,
+            'title' => \App\Support\LocalizedContent::pack($this->titleId, $this->titleEn),
+            'description' => \App\Support\LocalizedContent::pack($this->descriptionId, $this->descriptionEn),
+            'stats' => [
+                'id' => $statsId,
+                'en' => $statsEn,
+            ],
             'profile_image' => $image,
             'image' => $image,
         ]);

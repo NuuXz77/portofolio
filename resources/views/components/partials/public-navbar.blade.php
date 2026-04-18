@@ -23,6 +23,30 @@
     $currentHost = request()->getHost();
     $currentScheme = request()->getScheme();
     $currentPath = trim(request()->path(), '/');
+    $supportedLocales = (array) config('app.supported_locales', ['id', 'en']);
+    $currentLocale = app()->getLocale();
+    $pathSegments = $currentPath !== '' ? explode('/', $currentPath) : [];
+
+    if ($pathSegments !== [] && in_array((string) ($pathSegments[0] ?? ''), $supportedLocales, true)) {
+        array_shift($pathSegments);
+    }
+
+    $pathWithoutLocale = implode('/', $pathSegments);
+    $queryString = (string) request()->getQueryString();
+
+    $localeUrl = static function (string $locale) use ($pathWithoutLocale, $queryString): string {
+        $base = '/'.$locale;
+
+        if ($pathWithoutLocale !== '') {
+            $base .= '/'.$pathWithoutLocale;
+        }
+
+        if ($queryString !== '') {
+            $base .= '?'.$queryString;
+        }
+
+        return url($base);
+    };
 
     $isSameOrigin = static function (string $href) use ($currentHost, $currentScheme, $isAbsoluteHttp): bool {
         if (! $isAbsoluteHttp($href)) {
@@ -120,6 +144,23 @@
             </div>
 
             <div class="hidden items-center gap-2 lg:flex">
+                <div class="inline-flex items-center rounded-xl border border-white/10 bg-base-100/55 p-1">
+                    @foreach ($supportedLocales as $localeOption)
+                        @php
+                            $isActiveLocale = $currentLocale === $localeOption;
+                            $localeLabel = strtoupper($localeOption);
+                        @endphp
+                        <a
+                            href="{{ $localeUrl($localeOption) }}"
+                            class="btn btn-xs rounded-lg px-3 {{ $isActiveLocale ? 'btn-info text-base-content' : 'btn-ghost text-base-content/75' }}"
+                            @if($shouldNavigate($localeUrl($localeOption))) wire:navigate @endif
+                            aria-label="{{ __('common.language') }} {{ $localeLabel }}"
+                        >
+                            {{ $localeLabel }}
+                        </a>
+                    @endforeach
+                </div>
+
                 <label class="swap swap-rotate btn btn-circle btn-ghost" aria-label="Toggle color theme">
                     <input id="theme-toggle" type="checkbox" aria-label="Toggle color theme">
                     <i data-lucide="sun" class="swap-on h-5 w-5"></i>
@@ -145,6 +186,23 @@
                         <i data-lucide="sun" class="swap-on h-4 w-4"></i>
                         <i data-lucide="moon" class="swap-off h-4 w-4"></i>
                     </label>
+                </div>
+
+                <div class="mb-3 inline-flex items-center rounded-xl border border-white/10 bg-base-100/55 p-1">
+                    @foreach ($supportedLocales as $localeOption)
+                        @php
+                            $isActiveLocale = $currentLocale === $localeOption;
+                            $localeLabel = strtoupper($localeOption);
+                        @endphp
+                        <a
+                            href="{{ $localeUrl($localeOption) }}"
+                            class="btn btn-xs rounded-lg px-3 {{ $isActiveLocale ? 'btn-info text-base-content' : 'btn-ghost text-base-content/75' }}"
+                            @if($shouldNavigate($localeUrl($localeOption))) wire:navigate @endif
+                            aria-label="{{ __('common.language') }} {{ $localeLabel }}"
+                        >
+                            {{ $localeLabel }}
+                        </a>
+                    @endforeach
                 </div>
 
                 <div class="grid gap-2">

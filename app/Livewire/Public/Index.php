@@ -3,12 +3,14 @@
 namespace App\Livewire\Public;
 
 use App\Models\Article;
+use App\Models\Education;
 use App\Models\Experience;
 use App\Models\MenuItem;
 use App\Models\Project;
 use App\Models\Service;
 use App\Models\Skill;
 use App\Models\Testimonial;
+use App\Support\LocalizedContent;
 use App\Support\PortfolioContent;
 use App\Support\PublicNavbarData;
 use Livewire\Component;
@@ -27,7 +29,7 @@ class Index extends Component
             'description' => 'Portfolio and CMS powered website for fullstack engineering services.',
         ]);
 
-        $seoTitle = trim((string) ($seo['title'] ?? ''));
+        $seoTitle = trim((string) LocalizedContent::resolve($seo['title'] ?? '', default: ''));
         $resolvedTitle = ($seoTitle !== '' && strcasecmp($seoTitle, 'Wisnu.dev | Fullstack Web Developer') !== 0)
             ? $seoTitle
             : $fallbackBrandTitle;
@@ -99,6 +101,7 @@ class Index extends Component
             'projectCategoryFilters' => $projectCategoryFilters,
             'featuredProjects' => $featuredProjects,
             'latestArticles' => $latestArticles,
+            'educations' => Education::query()->where('is_active', true)->orderByDesc('start_year')->orderByDesc('id')->get(),
             'experiences' => Experience::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
             'services' => Service::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),
             'testimonials' => Testimonial::query()->where('is_visible', true)->orderBy('sort_order')->orderBy('id')->get(),

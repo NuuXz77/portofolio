@@ -15,9 +15,18 @@
         </div>
     </div>
 
+    <div class="tabs tabs-boxed inline-flex rounded-xl border border-base-content/10 bg-base-100/55 p-1">
+        <button type="button" wire:click="$set('editingLocale', 'id')" class="tab rounded-lg px-4 {{ $editingLocale === 'id' ? 'tab-active bg-info text-base-content' : '' }}">ID</button>
+        <button type="button" wire:click="$set('editingLocale', 'en')" class="tab rounded-lg px-4 {{ $editingLocale === 'en' ? 'tab-active bg-info text-base-content' : '' }}">EN</button>
+    </div>
+
     <form wire:submit="save" class="grid gap-5 xl:grid-cols-[1.45fr,1fr]">
         <article class="glass-card space-y-4 rounded-2xl border border-base-content/10 bg-base-100 p-5 shadow-sm">
-            <x-ui.input-field label="Title" name="title" wire:model.live.debounce.300ms="title" placeholder="Write article title" required />
+            @if ($editingLocale === 'id')
+                <x-ui.input-field label="Title (ID)" name="titleId" wire:model.live.debounce.300ms="titleId" placeholder="Tulis judul artikel (Indonesia)" required />
+            @else
+                <x-ui.input-field label="Title (EN)" name="titleEn" wire:model.live.debounce.300ms="titleEn" placeholder="Write article title (English)" required />
+            @endif
 
             <div class="grid gap-3 md:grid-cols-[1fr,auto]">
                 <x-ui.input-field label="Slug" name="slug" wire:model.defer="slug" placeholder="article-slug" required />
@@ -26,23 +35,41 @@
                 </div>
             </div>
 
-            <x-ui.textarea-field label="Excerpt" name="excerpt" wire:model.defer="excerpt" :rows="3" hint="Optional. Auto-generated if empty." />
+            @if ($editingLocale === 'id')
+                <x-ui.textarea-field label="Excerpt (ID)" name="excerptId" wire:model.defer="excerptId" :rows="3" hint="Opsional. Jika kosong, akan dibuat otomatis dari konten ID." />
+            @else
+                <x-ui.textarea-field label="Excerpt (EN)" name="excerptEn" wire:model.defer="excerptEn" :rows="3" hint="Optional. Auto-generated from EN content when empty." />
+            @endif
 
             <div class="glass-card-soft rounded-2xl border border-base-content/10 bg-base-200/35 p-3">
                 <div class="mb-2 flex items-center justify-between gap-2">
-                    <p class="text-sm font-medium text-base-content/80">Content</p>
+                    <p class="text-sm font-medium text-base-content/80">Content {{ strtoupper($editingLocale) }}</p>
                     <span class="text-xs text-base-content/55">Supports heading, list, link, image, code block</span>
                 </div>
 
-                <div wire:ignore data-journal-editor data-model-input="journal-content-input" class="glass-card-soft rounded-xl border border-base-content/15 bg-base-100">
-                    <div data-journal-editor-area class="journal-editor min-h-72"></div>
+                <div class="{{ $editingLocale === 'id' ? '' : 'hidden' }}">
+                    <div wire:ignore data-journal-editor data-model-input="journal-content-input-id" class="glass-card-soft rounded-xl border border-base-content/15 bg-base-100">
+                        <div data-journal-editor-area class="journal-editor min-h-72"></div>
+                    </div>
+
+                    <textarea id="journal-content-input-id" wire:model.defer="contentId" class="hidden"></textarea>
+
+                    @error('contentId')
+                        <span class="mt-2 block text-xs text-error">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <textarea id="journal-content-input" wire:model.defer="content" class="hidden"></textarea>
+                <div class="{{ $editingLocale === 'en' ? '' : 'hidden' }}">
+                    <div wire:ignore data-journal-editor data-model-input="journal-content-input-en" class="glass-card-soft rounded-xl border border-base-content/15 bg-base-100">
+                        <div data-journal-editor-area class="journal-editor min-h-72"></div>
+                    </div>
 
-                @error('content')
-                    <span class="mt-2 block text-xs text-error">{{ $message }}</span>
-                @enderror
+                    <textarea id="journal-content-input-en" wire:model.defer="contentEn" class="hidden"></textarea>
+
+                    @error('contentEn')
+                        <span class="mt-2 block text-xs text-error">{{ $message }}</span>
+                    @enderror
+                </div>
             </div>
 
             <x-ui.textarea-field label="Tags (comma separated)" name="tagsInput" wire:model.defer="tagsInput" :rows="2" placeholder="laravel, livewire, devlog" />
@@ -55,7 +82,7 @@
                 <div class="mt-4 space-y-3">
                     <x-ui.select-field label="Category" name="categoryId" wire:model.defer="categoryId" placeholder="Select category">
                         @foreach ($categories as $category)
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            <option value="{{ $category->id }}">{{ \App\Support\LocalizedContent::resolve($category->name_translations ?? $category->name, default: $category->name) }}</option>
                         @endforeach
                     </x-ui.select-field>
 
@@ -91,8 +118,13 @@
                         </div>
                     @endif
 
-                    <x-ui.input-field label="SEO Title" name="seoTitle" wire:model.defer="seoTitle" />
-                    <x-ui.textarea-field label="SEO Description" name="seoDescription" wire:model.defer="seoDescription" :rows="3" />
+                    @if ($editingLocale === 'id')
+                        <x-ui.input-field label="SEO Title (ID)" name="seoTitleId" wire:model.defer="seoTitleId" />
+                        <x-ui.textarea-field label="SEO Description (ID)" name="seoDescriptionId" wire:model.defer="seoDescriptionId" :rows="3" />
+                    @else
+                        <x-ui.input-field label="SEO Title (EN)" name="seoTitleEn" wire:model.defer="seoTitleEn" />
+                        <x-ui.textarea-field label="SEO Description (EN)" name="seoDescriptionEn" wire:model.defer="seoDescriptionEn" :rows="3" />
+                    @endif
                 </div>
             </article>
 

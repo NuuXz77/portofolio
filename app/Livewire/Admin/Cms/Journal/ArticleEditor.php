@@ -19,13 +19,27 @@ class ArticleEditor extends Component
 
     public ?int $articleId = null;
 
+    public string $editingLocale = 'id';
+
+    public string $titleId = '';
+
+    public string $titleEn = '';
+
     public string $title = '';
 
     public string $slug = '';
 
     public string $excerpt = '';
 
+    public string $excerptId = '';
+
+    public string $excerptEn = '';
+
     public string $content = '';
+
+    public string $contentId = '';
+
+    public string $contentEn = '';
 
     public string $tagsInput = '';
 
@@ -47,7 +61,15 @@ class ArticleEditor extends Component
 
     public string $seoTitle = '';
 
+    public string $seoTitleId = '';
+
+    public string $seoTitleEn = '';
+
     public string $seoDescription = '';
+
+    public string $seoDescriptionId = '';
+
+    public string $seoDescriptionEn = '';
 
     protected bool $autoGenerateSlug = true;
 
@@ -55,15 +77,38 @@ class ArticleEditor extends Component
     {
         $this->authorName = Auth::user()?->name ?? 'Admin';
 
+        $this->titleId = '';
+        $this->titleEn = '';
+        $this->excerptId = '';
+        $this->excerptEn = '';
+        $this->contentId = '';
+        $this->contentEn = '';
+        $this->seoTitleId = '';
+        $this->seoTitleEn = '';
+        $this->seoDescriptionId = '';
+        $this->seoDescriptionEn = '';
+
         if (! $article) {
             return;
         }
 
+        $titleTranslations = \App\Support\LocalizedContent::split($article->title_translations ?? $article->title);
+        $excerptTranslations = \App\Support\LocalizedContent::split($article->excerpt_translations ?? ($article->excerpt ?? ''));
+        $contentTranslations = \App\Support\LocalizedContent::split($article->content_translations ?? $article->content);
+        $seoTitleTranslations = \App\Support\LocalizedContent::split($article->seo_title_translations ?? ($article->seo_title ?? ''));
+        $seoDescriptionTranslations = \App\Support\LocalizedContent::split($article->seo_description_translations ?? ($article->seo_description ?? ''));
+
         $this->articleId = $article->id;
-        $this->title = $article->title;
+        $this->titleId = $titleTranslations['id'];
+        $this->titleEn = $titleTranslations['en'];
+        $this->title = $this->titleId;
         $this->slug = $article->slug;
-        $this->excerpt = $article->excerpt ?? '';
-        $this->content = $article->content;
+        $this->excerptId = $excerptTranslations['id'];
+        $this->excerptEn = $excerptTranslations['en'];
+        $this->excerpt = $this->excerptId;
+        $this->contentId = $contentTranslations['id'];
+        $this->contentEn = $contentTranslations['en'];
+        $this->content = $this->contentId;
         $this->tagsInput = collect($article->tags ?? [])->join(', ');
         $this->categoryId = $article->category_id;
         $this->status = $article->status;
@@ -72,18 +117,29 @@ class ArticleEditor extends Component
         $this->authorName = $article->author_name ?: $this->authorName;
         $this->existingThumbnail = $article->thumbnail_path;
         $this->accessToken = $article->access_token;
-        $this->seoTitle = $article->seo_title ?? '';
-        $this->seoDescription = $article->seo_description ?? '';
+        $this->seoTitleId = $seoTitleTranslations['id'];
+        $this->seoTitleEn = $seoTitleTranslations['en'];
+        $this->seoTitle = $this->seoTitleId;
+        $this->seoDescriptionId = $seoDescriptionTranslations['id'];
+        $this->seoDescriptionEn = $seoDescriptionTranslations['en'];
+        $this->seoDescription = $this->seoDescriptionId;
         $this->autoGenerateSlug = false;
     }
 
-    public function updatedTitle(string $value): void
+    public function updatedTitleId(string $value): void
     {
+        $this->title = $value;
+
         if (! $this->autoGenerateSlug) {
             return;
         }
 
         $this->slug = $this->buildUniqueSlug($value, $this->articleId);
+    }
+
+    public function updatedContentId(string $value): void
+    {
+        $this->content = $value;
     }
 
     public function updatedSlug(string $value): void
@@ -95,19 +151,29 @@ class ArticleEditor extends Component
     public function resetSlugAutoGeneration(): void
     {
         $this->autoGenerateSlug = true;
-        $this->slug = $this->buildUniqueSlug($this->title, $this->articleId);
+        $this->slug = $this->buildUniqueSlug($this->titleId !== '' ? $this->titleId : $this->titleEn, $this->articleId);
     }
 
     public function save(): void
     {
         $this->validate($this->rules(), [], [
+            'titleId' => 'title (ID)',
+            'titleEn' => 'title (EN)',
             'categoryId' => 'category',
             'tagsInput' => 'tags',
             'publishDate' => 'publish date',
             'authorName' => 'author',
-            'seoTitle' => 'SEO title',
-            'seoDescription' => 'SEO description',
+            'seoTitleId' => 'SEO title (ID)',
+            'seoTitleEn' => 'SEO title (EN)',
+            'seoDescriptionId' => 'SEO description (ID)',
+            'seoDescriptionEn' => 'SEO description (EN)',
         ]);
+
+        $this->title = trim($this->titleId) !== '' ? trim($this->titleId) : trim($this->titleEn);
+        $this->excerpt = trim($this->excerptId) !== '' ? trim($this->excerptId) : trim($this->excerptEn);
+        $this->content = trim($this->contentId) !== '' ? $this->contentId : $this->contentEn;
+        $this->seoTitle = trim($this->seoTitleId) !== '' ? trim($this->seoTitleId) : trim($this->seoTitleEn);
+        $this->seoDescription = trim($this->seoDescriptionId) !== '' ? trim($this->seoDescriptionId) : trim($this->seoDescriptionEn);
 
         $cleanContent = trim(strip_tags($this->content));
 
@@ -144,12 +210,15 @@ class ArticleEditor extends Component
                 'category_id' => $this->categoryId,
                 'created_by' => Auth::id(),
                 'title' => $this->title,
+                'title_translations' => \App\Support\LocalizedContent::pack($this->titleId, $this->titleEn),
                 'slug' => $slug,
                 'thumbnail_path' => $thumbnailPath,
                 'excerpt' => $this->excerpt !== ''
                     ? $this->excerpt
                     : Str::limit(preg_replace('/\\s+/', ' ', strip_tags($this->content)), 170),
+                'excerpt_translations' => \App\Support\LocalizedContent::pack($this->excerptId, $this->excerptEn),
                 'content' => $this->content,
+                'content_translations' => \App\Support\LocalizedContent::pack($this->contentId, $this->contentEn),
                 'tags' => $tags,
                 'status' => $this->status,
                 'visibility' => $this->visibility,
@@ -158,7 +227,9 @@ class ArticleEditor extends Component
                 'read_time' => max(1, (int) ceil(str_word_count(strip_tags($this->content)) / 220)),
                 'access_token' => $accessToken,
                 'seo_title' => $this->seoTitle !== '' ? $this->seoTitle : null,
+                'seo_title_translations' => \App\Support\LocalizedContent::pack($this->seoTitleId, $this->seoTitleEn),
                 'seo_description' => $this->seoDescription !== '' ? $this->seoDescription : null,
+                'seo_description_translations' => \App\Support\LocalizedContent::pack($this->seoDescriptionId, $this->seoDescriptionEn),
             ]
         );
 
@@ -209,22 +280,25 @@ class ArticleEditor extends Component
     public function render()
     {
         return view('admin.cms.journal.article-editor', [
-            'categories' => ArticleCategory::query()->orderBy('name')->get(['id', 'name']),
+            'categories' => ArticleCategory::query()->orderBy('name')->get(['id', 'name', 'name_translations']),
         ]);
     }
 
     protected function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:180'],
+            'titleId' => ['required', 'string', 'max:180'],
+            'titleEn' => ['required', 'string', 'max:180'],
             'slug' => [
                 'required',
                 'string',
                 'max:180',
                 Rule::unique('articles', 'slug')->ignore($this->articleId),
             ],
-            'excerpt' => ['nullable', 'string', 'max:500'],
-            'content' => ['required', 'string'],
+            'excerptId' => ['nullable', 'string', 'max:500'],
+            'excerptEn' => ['nullable', 'string', 'max:500'],
+            'contentId' => ['required', 'string'],
+            'contentEn' => ['required', 'string'],
             'categoryId' => ['nullable', 'integer', Rule::exists('article_categories', 'id')],
             'tagsInput' => ['nullable', 'string', 'max:600'],
             'status' => ['required', Rule::in(['draft', 'published'])],
@@ -232,8 +306,10 @@ class ArticleEditor extends Component
             'publishDate' => ['nullable', 'date'],
             'authorName' => ['required', 'string', 'max:120'],
             'thumbnail' => ['nullable', 'image', 'max:4096'],
-            'seoTitle' => ['nullable', 'string', 'max:180'],
-            'seoDescription' => ['nullable', 'string', 'max:255'],
+            'seoTitleId' => ['nullable', 'string', 'max:180'],
+            'seoTitleEn' => ['nullable', 'string', 'max:180'],
+            'seoDescriptionId' => ['nullable', 'string', 'max:255'],
+            'seoDescriptionEn' => ['nullable', 'string', 'max:255'],
         ];
     }
 
