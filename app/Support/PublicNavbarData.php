@@ -45,6 +45,7 @@ class PublicNavbarData
     {
         $navbar = PortfolioContent::get('navbar', []);
         $brandConfig = self::brandConfig($navbar);
+        $supportedLocales = (array) config('app.supported_locales', ['id', 'en']);
 
         $menuItems = MenuItem::query()
             ->where('is_visible', true)
@@ -54,6 +55,23 @@ class PublicNavbarData
 
         $homeUrl = route('home');
         $journalUrl = route('journal.index');
+        $normalizePath = static function (string $href) use ($supportedLocales): string {
+            $path = trim((string) parse_url($href, PHP_URL_PATH), '/');
+
+            if ($path === '') {
+                return '';
+            }
+
+            $segments = explode('/', $path);
+
+            if ($segments !== [] && in_array((string) ($segments[0] ?? ''), $supportedLocales, true)) {
+                array_shift($segments);
+            }
+
+            return trim(implode('/', $segments), '/');
+        };
+        $journalLabel = strtolower(trim((string) __('navigation.journal')));
+        $journalPath = $normalizePath($journalUrl);
 
         $navItems = $menuItems->isNotEmpty()
             ? $menuItems->map(fn ($item) => [
@@ -83,11 +101,12 @@ class PublicNavbarData
                     'label' => $label,
                 ];
             })
-            ->reject(function (array $item) use ($journalUrl): bool {
+            ->reject(function (array $item) use ($journalUrl, $normalizePath, $journalLabel, $journalPath): bool {
                 $label = trim((string) ($item['label'] ?? ''));
                 $href = trim((string) ($item['href'] ?? ''));
+                $normalizedLabel = strtolower($label);
 
-                if (strcasecmp($label, 'Journal') === 0) {
+                if ($normalizedLabel === 'journal' || $normalizedLabel === $journalLabel) {
                     return true;
                 }
 
@@ -99,10 +118,13 @@ class PublicNavbarData
                     return true;
                 }
 
-                $targetPath = trim((string) parse_url($href, PHP_URL_PATH), '/');
-                $journalPath = trim((string) parse_url($journalUrl, PHP_URL_PATH), '/');
+                $targetPath = $normalizePath($href);
 
-                return $targetPath !== '' && $targetPath === $journalPath;
+                if ($targetPath === '') {
+                    return false;
+                }
+
+                return $targetPath === 'journal' || $targetPath === $journalPath;
             })
             ->values();
 

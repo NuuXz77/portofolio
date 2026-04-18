@@ -20,6 +20,8 @@
 
     $isHashOnly = static fn (string $href): bool => str_starts_with($href, '#');
 
+    $hasFragment = static fn (string $href): bool => trim((string) parse_url($href, PHP_URL_FRAGMENT)) !== '';
+
     $currentHost = request()->getHost();
     $currentScheme = request()->getScheme();
     $currentPath = trim(request()->path(), '/');
@@ -63,8 +65,8 @@
         && ! $isHashOnly($href)
         && $isSameOrigin($href);
 
-    $isActive = static function (string $href) use ($currentPath, $isHashOnly, $isSpecialScheme, $isSameOrigin): bool {
-        if ($isSpecialScheme($href) || $isHashOnly($href) || ! $isSameOrigin($href)) {
+    $isActive = static function (string $href) use ($currentPath, $isHashOnly, $isSpecialScheme, $isSameOrigin, $hasFragment): bool {
+        if ($isSpecialScheme($href) || $isHashOnly($href) || $hasFragment($href) || ! $isSameOrigin($href)) {
             return false;
         }
 
