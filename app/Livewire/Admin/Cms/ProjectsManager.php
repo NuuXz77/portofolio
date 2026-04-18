@@ -119,7 +119,7 @@ class ProjectsManager extends Component
             'sortOrder' => ['required', 'integer', 'min:0'],
             'isFeatured' => ['required', 'boolean'],
             'isVisible' => ['required', 'boolean'],
-            'projectImage' => ['nullable', 'image', 'max:3072'],
+            'projectImage' => ['nullable', 'image', 'max:10240'],
         ]);
 
         $category = PortfolioCategory::query()
